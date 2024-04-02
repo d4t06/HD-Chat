@@ -1,6 +1,9 @@
 import { Bars3Icon, CameraIcon, PhotoIcon } from "@heroicons/react/24/outline";
 import Button from "./ui/Button";
 import AvatarPlaceholder from "./Avatar";
+import AccountItem from "./AccountItem";
+import { useEffect } from "react";
+import { io } from "socket.io-client";
 
 type Props = {};
 
@@ -11,18 +14,17 @@ export default function ChatScreen(props: Props) {
       chatBarContainer: "p-2 sm:p-4 border-t absolute bottom-0 left-0 right-0 z-10 bg-white",
    };
 
+   useEffect(() => {
+      const socket = io("http://localhost:8080", {path: '/websocket'});
+      console.log(socket);
+   }, []);
+
    return (
       <div className={classes.container}>
          {/* top */}
          <div className="px-4 py-2">
             <div className="flex flex-row justify-between h-12 items-center ">
-               <div className="flex">
-                  <AvatarPlaceholder size={'small'} firstChar={'A'} />
-                  <div className="ml-[10px]">
-                     <p className="text-[16px] leading-[20px]">{"admin"}</p>
-                     <p className="text-[14px] text-[#808080] leading-[18px]">1 hours ago</p>
-                  </div>
-               </div>
+               <AccountItem type="default" fullName={"Admin"} size="small" desc="1 hour ago" />
                <div className="flex">
                   <Button
                      className={classes.button + " ml-[10px]"}

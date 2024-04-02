@@ -1,10 +1,8 @@
 import { VariantProps, cva } from "class-variance-authority";
+import Skeleton from "./Skeleton";
+import { generateHSL } from "@/utils/getUniqueColor";
 
-const classes = {
-   container: "h-[44px]",
-};
-
-const avatarVariant = cva("rounded-[99px] overflow-hidden", {
+const avatarVariant = cva("", {
    variants: {
       size: {
          primary: "h-[44px] w-[44px] text-[24px]",
@@ -17,21 +15,38 @@ const avatarVariant = cva("rounded-[99px] overflow-hidden", {
 });
 
 interface Props extends VariantProps<typeof avatarVariant> {
-   firstChar: string;
-   image_url?: string;
+   type: "default";
+   active?: boolean;
+   fullName: string;
    className?: string;
 }
 
-export default function AvatarPlaceholder({ firstChar, image_url, size, className }: Props) {
-   return (
-      <div className={avatarVariant({ size, className })}>
-         {image_url ? (
-            <img src={image_url} className="w-full " alt="" />
-         ) : (
-            <div className="w-full h-full bg-[#e1e1e1] flex items-center justify-center">
-               <p className="text-[#666]">{firstChar}</p>
+interface LoadingProps extends VariantProps<typeof avatarVariant> {
+   className?: string;
+   type: "loading";
+}
+
+export default function AvatarPlaceholder({ size, ...props }: Props | LoadingProps) {
+   const classes = {
+      frame: "w-full h-full rounded-[99px] flex items-center justify-center",
+   };
+
+   if (props.type === "loading") return <Skeleton className={avatarVariant({ size })} />;
+
+   if (props.type === "default") {
+      const { fullName, active, className = "" } = props;
+
+      const color = generateHSL(fullName);
+
+      return (
+         <div className={avatarVariant({ size, className: className || "" + " relative" })}>
+            <div style={{ backgroundColor: color }} className={classes.frame}>
+               <p className="text-[#fff]">{fullName.charAt(0)}</p>
+               {active && (
+                  <span className="absolute border-[3px] border-white p-[5px] bg-emerald-400 rounded-full bottom-[0px] right-[-2px]"></span>
+               )}
             </div>
-         )}
-      </div>
-   );
+         </div>
+      );
+   }
 }

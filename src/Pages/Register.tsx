@@ -34,7 +34,7 @@ export default function RegisterPage() {
    // hooks
    const navigate = useNavigate();
 
-   const ableToSubmit = () =>
+   const ableToSubmit =
       validPhoneNumber && validPassword && validConfirmPassword && prevUser.current !== phoneNumber;
 
    const checkPhoneNumber = () => {
@@ -46,6 +46,7 @@ export default function RegisterPage() {
       try {
          e.preventDefault();
          setIsFetching(true);
+         setErrorMsg("")
 
          if (import.meta.env.DEV) await sleep(1000);
          await publicRequest.post(REGISTER_URL, {
@@ -59,7 +60,7 @@ export default function RegisterPage() {
          if (!error?.response) {
             setErrorMsg("No server response");
          } else if (error?.response.status === 409) {
-            setErrorMsg("Username has taken, please use another instead");
+            setErrorMsg("This phone number already used, please use another instead");
          } else {
             setErrorMsg("Register fail");
          }
@@ -222,12 +223,13 @@ export default function RegisterPage() {
                      disabled={!ableToSubmit}
                      isLoading={isFetching}
                      variant="push"
-                     className="leading-[26px] w-full md:w-auto mt-[20px]"
+                     size="clear"
+                     className="h-[36px] w-full md:w-[100px] mt-[20px]"
                      type="submit"
                   >
                      Sign up
                   </Button>
-                  <p className="text-[14px] mt-[20px]">
+                  <p className="mt-[20px]">
                      Already have an account ?,
                      <Link className="text-[#cd1818] hover:underline ml-[4px]" to="/login">
                         Sign in

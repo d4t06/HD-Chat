@@ -2,8 +2,8 @@ import { Dispatch, ReactNode, SetStateAction, createContext, useContext, useStat
 
 type StateType = {
    auth: {
-      fullName: String;
-      token: String;
+      fullName: string;
+      token: string;
    } | null;
    loading: boolean;
 };
@@ -18,7 +18,7 @@ export type AuthResponse = {
    userInfo: {
       fullName: string;
    };
-   token: String;
+   token: string;
 };
 
 const initContextState: ContextType = {

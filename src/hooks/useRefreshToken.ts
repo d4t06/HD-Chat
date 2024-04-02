@@ -1,12 +1,16 @@
+import axios from "axios";
 import { AuthResponse, useAuth } from "../stores/AuthContext";
-import { publicRequest } from "../utils/request";
+
+const REFRESH_URL = "http://localhost:8080/auth/refresh";
 
 const useRefreshToken = () => {
    const { setAuth } = useAuth();
 
    const refresh = async () => {
       try {
-         const response = await publicRequest.get("/auth/refresh");
+         const response = await axios.get(REFRESH_URL, {
+            withCredentials: true,
+         });
 
          setAuth(() => {
             const data = response.data.data as AuthResponse;

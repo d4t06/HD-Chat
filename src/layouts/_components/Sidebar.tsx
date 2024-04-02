@@ -1,21 +1,10 @@
 import { useState } from "react";
 import Button from "../../components/ui/Button";
-import {
-   Bars3Icon,
-   CheckIcon,
-   MagnifyingGlassIcon,
-   PlusIcon,
-   XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { CheckIcon, MagnifyingGlassIcon, PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Modal from "../../components/Modal";
-import AvatarPlaceholder from "../../components/Avatar";
-import ConversationItem from "../../components/ConversationItem";
-import PushFrame from "../../components/ui/PushFrame";
+import AccountItem from "../../components/AccountItem";
 import { Link } from "react-router-dom";
-
-const testConversation: Conversation = {
-   username: "Admin"
-};
+import { useAuth } from "@/stores/AuthContext";
 
 export default function Sidebar({ id: conversation_id }: { id?: string }) {
    const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
@@ -24,6 +13,9 @@ export default function Sidebar({ id: conversation_id }: { id?: string }) {
    const [error, setError] = useState<boolean>(false);
 
    // const [currentConversation, setCurrentConversation] = useState<number>(0);
+
+   // hooks
+   const { auth, loading } = useAuth();
 
    const handleCloseModal = () => {
       setIsOpenModal(false);
@@ -36,7 +28,7 @@ export default function Sidebar({ id: conversation_id }: { id?: string }) {
       header: "flex justify-center sm:justify-between items-center",
       searchContainer: "pl-[10px] bg-[#f3f3f5] border-[2px] border-[#ccc] rounded-[99px] flex",
       input: "h-[34px] pl-[10px] flex-1 bg-transparent outline-none",
-      conversationList: "flex flex-col h-[calc(100vh-7.25rem)] overflow-y-auto",
+      conversationList: "flex flex-col h-[calc(100vh-7.25rem)] overflow-y-auto no-scrollbar",
    };
 
    return (
@@ -46,7 +38,15 @@ export default function Sidebar({ id: conversation_id }: { id?: string }) {
             <div className="px-2 sm:px-4 pt-2 sm:pb-[16px]">
                {/* header */}
                <div className={classes.header}>
-                  <ConversationItem conversation={testConversation} />
+                  {loading ? (
+                     <AccountItem type="loading" />
+                  ) : (
+                     <>
+                        {auth && (
+                           <AccountItem active={true} type="default" fullName={auth.fullName} />
+                        )}
+                     </>
+                  )}
                   <div className="hidden sm:flex">
                      <Button
                         className={classes.button}
@@ -74,9 +74,17 @@ export default function Sidebar({ id: conversation_id }: { id?: string }) {
 
             {/*  conversation list */}
             <div className={classes.conversationList}>
-               {[...Array(5).keys()].map((key) => (
-                  <Link to={`/conversation/${testConversation.username}`} className={`hover:bg-[#f3f3f5] p-2 sm:px-4`}>
-                     <ConversationItem conversation={testConversation} />
+               {[...Array(2).keys()].map((key) => (
+                  <Link key={key} to={`/conversation/admin`} className={`hover:bg-[#f3f3f5] p-2 sm:px-4`}>
+                     {loading ? (
+                        <AccountItem type="loading" />
+                     ) : (
+                        <>
+                           {auth && (
+                              <AccountItem active={false} type="default" fullName={auth.fullName} />
+                           )}
+                        </>
+                     )}{" "}
                   </Link>
                ))}
             </div>

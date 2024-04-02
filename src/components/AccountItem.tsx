@@ -1,0 +1,40 @@
+import AvatarPlaceholder from "./Avatar";
+import Skeleton from "./Skeleton";
+
+type Props = {
+   type: "default";
+   fullName: string;
+   size?: "primary" | "small";
+   className?: string;
+   desc?: string;
+   active?: boolean;
+};
+
+type Loading = {
+   type: "loading";
+   size?: "primary" | "small";
+};
+
+export default function AccountItem({ size = "primary", ...props }: Props | Loading) {
+   if (props.type === "loading") return;
+   <div className="flex justify-center sm:justify-start">
+      <AvatarPlaceholder type="loading" size={size} />
+      <div className="ml-[10p]">
+         <Skeleton className="h-[22px] w-[100px]" />
+         <Skeleton className="h-[22px] w-[60px]" />
+      </div>
+   </div>;
+
+   if (props.type === "default") {
+      const { fullName, className, desc, active } = props;
+      return (
+         <div className={`flex cursor-pointer justify-center sm:justify-start ${className || ""}`}>
+            <AvatarPlaceholder active={active} type="default" size={size} fullName={fullName} />
+            <div className="ml-[10px] hidden sm:block">
+               <p className="text-[16px] leading-[20px]">{fullName}</p>
+               {desc && <p className="text-[14px] text-[#808080]">{desc}</p>}
+            </div>
+         </div>
+      );
+   }
+}

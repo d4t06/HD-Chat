@@ -12,18 +12,19 @@ export const classes = {
    myChat: "text-[26px] leading-[40px] font-[500]",
    right: "space-y-[16px] mt-[20px] md:mt-0",
    inputGroup: "flex flex-col space-y-[2px]",
-   label: "text-[14px] text-[#333]",
+   label: "text-[#1f1f1f]",
    input: "py-[4px] rounded-[6px] border border-black/15 outline-none px-[10px]",
-   errorMessage: "bg-red-500/30 text-red-500 p-[6px] mt-[20px] rounded-[6px] inline-block",
+   errorMessage:
+      "bg-red-500/30 text-red-500 font-[500] md:mr-[14px] p-[6px] mt-[20px] rounded-[6px] inline-block",
 };
 
-const LOGIN_URL = "http://localhost:8080/api/auth/login";
+const LOGIN_URL = "http://localhost:8080/auth/login";
 
 type AuthResponse = {
    userInfo: {
       fullName: string;
    };
-   token: String;
+   token: string;
 };
 
 export default function LoginPage() {
@@ -45,6 +46,7 @@ export default function LoginPage() {
          e.preventDefault();
 
          setIsFetching(true);
+         setErrorMsg("");
          if (import.meta.env.DEV) await sleep(1000);
 
          const response = await axios.post(
@@ -60,8 +62,6 @@ export default function LoginPage() {
          const data = response.data.data as AuthResponse;
 
          setAuth({ fullName: data.userInfo.fullName, token: data.token });
-
-         console.log("check data", data);
 
          return navigate("/");
       } catch (error: any) {
@@ -131,7 +131,7 @@ export default function LoginPage() {
                   >
                      Sign in
                   </Button>
-                  <p className="text-[14px] mt-[20px]">
+                  <p className="mt-[20px]">
                      Don't have an account jet ?,
                      <Link className="text-[#cd1818] hover:underline ml-[4px]" to="/register">
                         Sign up
