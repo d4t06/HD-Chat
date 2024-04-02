@@ -1,13 +1,18 @@
+import { ReactElement, ReactNode } from "react";
+import ConversationPage from "../Pages/Conversation";
 import HomePage from "../Pages/Home";
 import LoginPage from "../Pages/Login";
 import RegisterPage from "../Pages/Register";
 import LoginLayout from "../layouts/AuthLayout";
+import DefaultLayout from "../layouts/DefaultLayout";
 
-const routes = [
-   {
-      path: "/",
-      component: HomePage,
-   },
+export type Route = {
+   path: string;
+   component: () => ReactElement;
+   layout: (pros: { children: ReactNode }) => ReactElement;
+};
+
+const publicRoutes: Route[] = [
    {
       path: "/login",
       component: LoginPage,
@@ -20,4 +25,17 @@ const routes = [
    },
 ];
 
-export default routes;
+const privateRoutes = [
+   {
+      path: "/",
+      component: HomePage,
+      layout: DefaultLayout,
+   },
+   {
+      path: "/conversation/:id",
+      component: ConversationPage,
+      layout: DefaultLayout,
+   },
+];
+
+export { publicRoutes, privateRoutes };

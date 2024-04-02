@@ -1,6 +1,9 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Button from "../components/ui/Button";
 import { FormEvent, useEffect, useRef, useState } from "react";
+import axios from "axios";
+import { useAuth } from "../stores/AuthContext";
+import { sleep } from "../utils/appHelper";
 
 export const classes = {
    container:
@@ -9,36 +12,77 @@ export const classes = {
    myChat: "text-[26px] leading-[40px] font-[500]",
    right: "space-y-[16px] mt-[20px] md:mt-0",
    inputGroup: "flex flex-col space-y-[2px]",
-   label: "text-[14px] text-[#1f1f1f]",
+   label: "text-[14px] text-[#333]",
    input: "py-[4px] rounded-[6px] border border-black/15 outline-none px-[10px]",
-   errorMessage: "bg-red-500/30 text-red-500 p-[6px] rounded-[6px] inline-block",
+   errorMessage: "bg-red-500/30 text-red-500 p-[6px] mt-[20px] rounded-[6px] inline-block",
+};
+
+const LOGIN_URL = "http://localhost:8080/api/auth/login";
+
+type AuthResponse = {
+   userInfo: {
+      fullName: string;
+   };
+   token: String;
 };
 
 export default function LoginPage() {
-   const userInputRef = useRef<HTMLInputElement>(null);
+   const inputRef = useRef<HTMLInputElement>(null);
 
    const [isFetching, setIsFetching] = useState(false);
-   const [userName, setUserName] = useState("");
+   const [phoneNumber, setPhoneNumber] = useState("");
    const [password, setPassword] = useState("");
    const [errMsg, setErrorMsg] = useState("");
 
-   const ableToSubmit = userName && password;
+   // hooks
+   const { setAuth } = useAuth();
+   const navigate = useNavigate();
+
+   const ableToSubmit = phoneNumber && password;
 
    const handleSubmit = async (e: FormEvent) => {
-      e.preventDefault();
+      try {
+         e.preventDefault();
 
-      console.log("submit");
+         setIsFetching(true);
+         if (import.meta.env.DEV) await sleep(1000);
+
+         const response = await axios.post(
+            LOGIN_URL,
+            {
+               phoneNumber,
+               password,
+            },
+            {
+               withCredentials: true,
+            }
+         );
+         const data = response.data.data as AuthResponse;
+
+         setAuth({ fullName: data.userInfo.fullName, token: data.token });
+
+         console.log("check data", data);
+
+         return navigate("/");
+      } catch (error: any) {
+         console.log({ message: error });
+
+         if (!error?.response) return setErrorMsg("No server response");
+         setErrorMsg("Phone number or password invalid");
+      } finally {
+         setIsFetching(false);
+      }
    };
 
    useEffect(() => {
-      userInputRef.current?.focus();
+      inputRef.current?.focus();
    }, []);
 
    return (
       <div className={classes.container}>
          <form
             onSubmit={handleSubmit}
-            className={`${classes.form} ${false ? "opacity-60 pointer-events-none" : ""}`}
+            className={`${classes.form} ${isFetching ? "opacity-60 pointer-events-none" : ""}`}
          >
             <div className="mt-0 md:mt-[-50px] text-center md:text-left">
                <h1 className={classes.myChat}>
@@ -50,13 +94,13 @@ export default function LoginPage() {
             <div className={classes.right}>
                <div className={`${classes.inputGroup} pt-[8px]`}>
                   <label className={classes.label} htmlFor="username">
-                     Username
+                     Phone number
                   </label>
                   <input
-                     ref={userInputRef}
+                     ref={inputRef}
                      className={classes.input}
-                     value={userName}
-                     onChange={(e) => setUserName(e.target.value)}
+                     value={phoneNumber}
+                     onChange={(e) => setPhoneNumber(e.target.value)}
                      id="username"
                      type="text"
                   />
@@ -75,18 +119,14 @@ export default function LoginPage() {
                      required
                   />
                </div>
-               <div className="">
-                  <input type="checkbox" id="persist" />
-                  <label className="ml-[8px] text-[14px]" htmlFor="persist">
-                     Trust this device :v ?
-                  </label>
-               </div>
 
                <div className="md:text-right">
                   <Button
                      disabled={!ableToSubmit}
+                     isLoading={isFetching}
                      variant="push"
-                     className="leading-[26px] w-full md:w-auto mt-[20px]"
+                     size="clear"
+                     className="h-[36px] w-full md:w-[100px] mt-[20px]"
                      type="submit"
                   >
                      Sign in

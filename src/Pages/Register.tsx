@@ -1,19 +1,27 @@
 import { Link, useNavigate } from "react-router-dom";
 import Button from "../components/ui/Button";
-import { useEffect, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { CheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { classes } from "./Login";
+import { publicRequest } from "../utils/request";
+import { sleep } from "../utils/appHelper";
 
-const USER_REGEX = /^(?=.{4,20}$)[a-zA-Z].*/;
+const REGISTER_URL = "/auth/register";
+
+// const USER_REGEX = /^(?=.{4,20}$)[a-zA-Z].*/;
 const PWD_REGEX = /^(?=.*[0-9])[a-zA-Z0-9!@#$%^&*]{6,16}$/;
 
 export default function RegisterPage() {
-   const userInputRef = useRef<HTMLInputElement>(null);
+   const inputRef = useRef<HTMLInputElement>(null);
    const prevUser = useRef("");
 
    const [isFetching, setIsFetching] = useState(false);
-   const [userName, setUserName] = useState("");
-   const [validName, setValidName] = useState(false);
+   const [phoneNumber, setPhoneNumber] = useState("");
+   const [validPhoneNumber, setValidPhoneNumber] = useState(false);
+
+   const [fullName, setFullName] = useState("");
+   const [isBlurFullName, setIsBlurredFullName] = useState(false);
+   const [validFullName, setValidFullName] = useState(false);
 
    const [password, setPassword] = useState("");
    const [validPassword, setValidPassword] = useState(false);
@@ -27,26 +35,54 @@ export default function RegisterPage() {
    const navigate = useNavigate();
 
    const ableToSubmit = () =>
-      validName && validPassword && validConfirmPassword && prevUser.current !== userName;
+      validPhoneNumber && validPassword && validConfirmPassword && prevUser.current !== phoneNumber;
 
-   const handleClear = () => {
-      setUserName("");
-      setPassword("");
+   const checkPhoneNumber = () => {
+      if (phoneNumber.charAt(0) !== "0" || phoneNumber.length !== 10) return false;
+      return true;
    };
 
-   const handleSubmit = async () => {};
+   const handleSubmit = async (e: FormEvent) => {
+      try {
+         e.preventDefault();
+         setIsFetching(true);
+
+         if (import.meta.env.DEV) await sleep(1000);
+         await publicRequest.post(REGISTER_URL, {
+            fullName,
+            password,
+            phoneNumber,
+         });
+
+         navigate("/login");
+      } catch (error: any) {
+         if (!error?.response) {
+            setErrorMsg("No server response");
+         } else if (error?.response.status === 409) {
+            setErrorMsg("Username has taken, please use another instead");
+         } else {
+            setErrorMsg("Register fail");
+         }
+      } finally {
+         setIsFetching(false);
+      }
+   };
 
    useEffect(() => {
-      userInputRef.current?.focus();
+      inputRef.current?.focus();
    }, []);
+
+   // validate full name
+   useEffect(() => {
+      if (!fullName) return setValidFullName(false);
+      else return setValidFullName(true);
+   }, [fullName]);
 
    // validate phone number
    useEffect(() => {
-      const result = USER_REGEX.test(userName);
-
-      setValidName(result);
-   }, [userName]);
-   1;
+      const result = checkPhoneNumber();
+      setValidPhoneNumber(result);
+   }, [phoneNumber]);
 
    // validate password
    useEffect(() => {
@@ -81,24 +117,50 @@ export default function RegisterPage() {
             <div className={classes.right}>
                <div className={classes.inputGroup}>
                   <div className={_classes.labelGroup}>
-                     <label className={classes.label} htmlFor="username">
-                        Phone number
+                     <label className={classes.label} htmlFor="fullName">
+                        Display name
                      </label>
-                     {userName && (
+
+                     {isBlurFullName && (
                         <span>
-                           {validName ? (
-                              <CheckIcon v-if="validName" className={_classes.checkIcon} />
+                           {validFullName ? (
+                              <CheckIcon className={_classes.checkIcon} />
                            ) : (
-                              <XMarkIcon v-else className={_classes.xIcon} />
+                              <XMarkIcon className={_classes.xIcon} />
                            )}
                         </span>
                      )}
                   </div>
 
                   <input
-                     ref={userInputRef}
-                     value={userName}
-                     onChange={(e) => setUserName(e.target.value)}
+                     ref={inputRef}
+                     value={fullName}
+                     onChange={(e) => setFullName(e.target.value)}
+                     className={classes.input}
+                     onBlur={() => setIsBlurredFullName(true)}
+                     id="fullName"
+                     type="text"
+                  />
+               </div>
+               <div className={classes.inputGroup}>
+                  <div className={_classes.labelGroup}>
+                     <label className={classes.label} htmlFor="username">
+                        Phone number
+                     </label>
+                     {phoneNumber && (
+                        <span>
+                           {validPhoneNumber ? (
+                              <CheckIcon className={_classes.checkIcon} />
+                           ) : (
+                              <XMarkIcon className={_classes.xIcon} />
+                           )}
+                        </span>
+                     )}
+                  </div>
+
+                  <input
+                     value={phoneNumber}
+                     onChange={(e) => setPhoneNumber(e.target.value)}
                      className={classes.input}
                      id="username"
                      type="text"
@@ -112,9 +174,9 @@ export default function RegisterPage() {
                      {password && (
                         <span>
                            {validPassword ? (
-                              <CheckIcon v-if="validName" className={_classes.checkIcon} />
+                              <CheckIcon className={_classes.checkIcon} />
                            ) : (
-                              <XMarkIcon v-else className={_classes.xIcon} />
+                              <XMarkIcon className={_classes.xIcon} />
                            )}
                         </span>
                      )}
@@ -138,9 +200,9 @@ export default function RegisterPage() {
                      {confirmPassword && (
                         <span>
                            {validConfirmPassword && validPassword ? (
-                              <CheckIcon v-if="validName" className={_classes.checkIcon} />
+                              <CheckIcon className={_classes.checkIcon} />
                            ) : (
-                              <XMarkIcon v-else className={_classes.xIcon} />
+                              <XMarkIcon className={_classes.xIcon} />
                            )}
                         </span>
                      )}
@@ -157,7 +219,8 @@ export default function RegisterPage() {
 
                <div className="md:text-right ">
                   <Button
-                     disabled={true}
+                     disabled={!ableToSubmit}
+                     isLoading={isFetching}
                      variant="push"
                      className="leading-[26px] w-full md:w-auto mt-[20px]"
                      type="submit"

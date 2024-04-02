@@ -8,6 +8,14 @@ import {
    XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Modal from "../../components/Modal";
+import AvatarPlaceholder from "../../components/Avatar";
+import ConversationItem from "../../components/ConversationItem";
+import PushFrame from "../../components/ui/PushFrame";
+import { Link } from "react-router-dom";
+
+const testConversation: Conversation = {
+   username: "Admin"
+};
 
 export default function Sidebar({ id: conversation_id }: { id?: string }) {
    const [isOpenModal, setIsOpenModal] = useState<boolean>(false);
@@ -22,55 +30,55 @@ export default function Sidebar({ id: conversation_id }: { id?: string }) {
       setNewConverSation("");
    };
 
+   const classes = {
+      container: "w-[70px] sm:w-[360px] flex-shrink-0 border-r h-screen overflow-hidden",
+      button: "p-[4px]",
+      header: "flex justify-center sm:justify-between items-center",
+      searchContainer: "pl-[10px] bg-[#f3f3f5] border-[2px] border-[#ccc] rounded-[99px] flex",
+      input: "h-[34px] pl-[10px] flex-1 bg-transparent outline-none",
+      conversationList: "flex flex-col h-[calc(100vh-7.25rem)] overflow-y-auto",
+   };
+
    return (
       <>
-         <div className="border-r h-screen overflow-hidden">
+         <div className={classes.container}>
             {/* top */}
-            <div className="p-4">
+            <div className="px-2 sm:px-4 pt-2 sm:pb-[16px]">
                {/* header */}
-               <div className="flex justify-between h-12 items-center">
-                  <div className="rounded-full flex-shrink-0 border-2 border-gray-200"></div>
-                  <div className="flex gap-4">
+               <div className={classes.header}>
+                  <ConversationItem conversation={testConversation} />
+                  <div className="hidden sm:flex">
                      <Button
-                     // onclick={() => setIsOpenModal(true)}
+                        className={classes.button}
+                        variant={"push"}
+                        size={"clear"}
+                        colors="secondary"
                      >
-                        <PlusIcon className="w-[24px]" />
-                     </Button>
-                     <Button>
-                        <Bars3Icon className="w-[24px]" />
+                        <PlusIcon className="w-[22px]" />
                      </Button>
                   </div>
                </div>
 
                {/* search */}
-               <div className="mt-5">
-                  <div className="w-full">
-                     <div className="bg-slate-100 p-4 rounded-full h-12 overflow-hidden flex flex-row">
-                        <Button className="bg-transparent text-xl h-full pl-3">
-                           <MagnifyingGlassIcon className="w-[24px]" />
-                        </Button>
-                        <input
-                           className="h-full flex-1 bg-transparent pl-3 outline-none"
-                           placeholder="Search..."
-                           type="text"
-                        />
+               <div className="mt-[16px] hidden sm:block">
+                  <div className={classes.searchContainer}>
+                     <div className="flex items-center">
+                        <MagnifyingGlassIcon className="w-[24px]" />
                      </div>
+                     <input className={classes.input} placeholder="Search..." type="text" />
                   </div>
                </div>
+
+               <div className="mt-[14px] pt-[14px] border-t sm:hidden"></div>
             </div>
 
-            {/* bottom */}
             {/*  conversation list */}
-            <div className=" flex flex-col gap-2 overflow-auto p-4 h-[calc(100vh-7.25rem)] overflow-y-auto border-t border-transparent hover:border-gray-200">
-               {/* {conversations?.length &&
-                  conversations.map((conversation, index) => (
-                     <Link href={`/conversations/${conversation.id}`} key={conversation.id}>
-                        <AccountItem
-                           active={conversation.id == conversation_id}
-                           conversation={conversation}
-                        />
-                     </Link>
-                  ))} */}
+            <div className={classes.conversationList}>
+               {[...Array(5).keys()].map((key) => (
+                  <Link to={`/conversation/${testConversation.username}`} className={`hover:bg-[#f3f3f5] p-2 sm:px-4`}>
+                     <ConversationItem conversation={testConversation} />
+                  </Link>
+               ))}
             </div>
          </div>
 
