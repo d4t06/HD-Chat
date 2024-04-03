@@ -1,10 +1,20 @@
-import { Dispatch, ReactNode, SetStateAction, createContext, useContext, useState } from "react";
+import {
+   Dispatch,
+   ReactNode,
+   SetStateAction,
+   createContext,
+   useContext,
+   useState,
+} from "react";
+
+export type AuthType = {
+   fullName: string;
+   id: number;
+   token: string;
+};
 
 type StateType = {
-   auth: {
-      fullName: string;
-      token: string;
-   } | null;
+   auth: AuthType | null;
    loading: boolean;
 };
 

@@ -1,9 +1,10 @@
-import { Bars3Icon, CameraIcon, PhotoIcon } from "@heroicons/react/24/outline";
+import { ArrowPathIcon, Bars3Icon, PhotoIcon } from "@heroicons/react/24/outline";
 import Button from "./ui/Button";
-import AvatarPlaceholder from "./Avatar";
 import AccountItem from "./AccountItem";
-import { useEffect } from "react";
-import { io } from "socket.io-client";
+import { useParams, useSearchParams } from "react-router-dom";
+import useCurrentConversation from "@/hooks/useCurrentConversation";
+import ConversationItem from "./ConversationItem";
+import { useAuth } from "@/stores/AuthContext";
 
 type Props = {};
 
@@ -11,20 +12,47 @@ export default function ChatScreen(props: Props) {
    const classes = {
       container: "h-screen overflow-hidden relative",
       button: "p-[4px]",
-      chatBarContainer: "p-2 sm:p-4 border-t absolute bottom-0 left-0 right-0 z-10 bg-white",
+      chatBarContainer:
+         "p-2 sm:p-4 border-t absolute bottom-0 left-0 right-0 z-10 bg-white",
    };
 
-   useEffect(() => {
-      const socket = io("http://localhost:8080", {path: '/websocket'});
-      console.log(socket);
-   }, []);
+   const params = useParams();
+   const { auth } = useAuth();
+   const [searchParams, setSearchParams] = useSearchParams();
+
+   const { currentConversation, isFetching, messages } = useCurrentConversation({
+      searchParams,
+      conversation_id: params.id,
+   });
+
+   if (!currentConversation && !searchParams.get("name"))
+      return <p>Some thing went wrong</p>;
 
    return (
       <div className={classes.container}>
          {/* top */}
          <div className="px-4 py-2">
             <div className="flex flex-row justify-between h-12 items-center ">
-               <AccountItem type="default" fullName={"Admin"} size="small" desc="1 hour ago" />
+               {auth && (
+                  <>
+                     {currentConversation ? (
+                        <ConversationItem
+                           type="default"
+                           auth={auth}
+                           c={currentConversation}
+                           size="small"
+                           desc="1 hour ago"
+                        />
+                     ) : (
+                        <AccountItem
+                           type="default"
+                           fullName={searchParams.get("name") || ""}
+                           size="small"
+                           desc="New conversation"
+                        />
+                     )}
+                  </>
+               )}
                <div className="flex">
                   <Button
                      className={classes.button + " ml-[10px]"}
@@ -40,7 +68,11 @@ export default function ChatScreen(props: Props) {
 
          {/* main content */}
          <div className="h-[calc(100vh-10rem)] p-4 overflow-auto flex flex-col gap-10">
-            {/* {renderMessage()} */}
+            {isFetching && (
+               <span>
+                  <ArrowPathIcon className="w-[24px]" />
+               </span>
+            )}
          </div>
 
          {/* chat input */}
