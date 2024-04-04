@@ -20,14 +20,23 @@ const initState: StateType = {
    tempUser: null,
 };
 
+type PayloadType = Partial<StateType> & {
+   replace?: boolean;
+};
+
 const currentConversationSlice = createSlice({
    name: "currentConversation",
    initialState: initState,
    reducers: {
-      storingConversation: (state, action: PayloadAction<Partial<StateType>>) => {
-         const payload = action.payload;
+      storingConversation: (state, action: PayloadAction<PayloadType>) => {
+         const { replace = false, ...payload } = action.payload;
 
-         Object.assign(state, payload);
+         if (replace) return Object.assign(state, payload);
+
+         return Object.assign(state, {
+            ...payload,
+            messages: [...(payload.messages || []), ...state.messages],
+         });
       },
    },
 });

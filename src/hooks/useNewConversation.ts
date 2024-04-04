@@ -4,10 +4,14 @@ import useMessageActions from "./useMessageActions";
 import useConversationActions from "./useConversationActions";
 import useMemberActions from "./useMemberActions";
 import { useAuth } from "@/stores/AuthContext";
+import { useConversation } from "@/stores/ConversationContext";
 
 export default function useSendMessageToNewConversation() {
-   const { auth } = useAuth();
    const dispatch = useDispatch();
+
+   const { auth } = useAuth();
+   const { setConversations } = useConversation();
+
    const { tempUser } = useSelector(selectCurrentConversation);
 
    const { sendMessage } = useMessageActions();
@@ -26,17 +30,10 @@ export default function useSendMessageToNewConversation() {
             type: "text",
          };
 
-         dispatch(
-            storingConversation({
-               currentConversationInStore: c,
-               messages: [firstMessage],
-            })
-         );
-
          const ownerMember: MemberSchema = {
             conversation_id: c.id,
             is_owner: true,
-            user_id: auth?.id,
+            user_id: auth.id,
          };
 
          const member: MemberSchema = {
@@ -45,11 +42,25 @@ export default function useSendMessageToNewConversation() {
             user_id: tempUser.id,
          };
 
-         await addMember(ownerMember);
-         await addMember(member);
+         const m1 = await addMember(ownerMember);
+         const m2 = await addMember(member);
+
+         if (m1 && m2) {
+            c.members = [m1, m2];
+
+            setConversations((prev) => [c, ...prev]);
+
+            dispatch(
+               storingConversation({
+                  currentConversationInStore: c,
+               })
+            );
+         }
 
          await sendMessage(firstMessage);
-      } catch (error) {}
+      } catch (error) {
+         console.log({ message: error });
+      }
    };
 
    return {

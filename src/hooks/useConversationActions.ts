@@ -1,11 +1,8 @@
-import { useState } from "react";
 import usePrivateRequest from "./usePrivateRequest";
 
 const CONVERSATION_URL = "/conversations";
 
 export default function useConversationActions() {
-   const [isFetching, setIsFetching] = useState(false);
-
    const privateRequest = usePrivateRequest();
 
    const createConversation = async ({ name }: { name: string }) => {
@@ -17,7 +14,5 @@ export default function useConversationActions() {
       // }
    };
 
-   const invite = async () => {};
-
-   return { isFetching, createConversation };
+   return { createConversation };
 }

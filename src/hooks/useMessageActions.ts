@@ -1,11 +1,18 @@
 import { sleep } from "@/utils/appHelper";
 import { useState } from "react";
 import usePrivateRequest from "./usePrivateRequest";
+import { useDispatch } from "react-redux";
+import { storingConversation } from "@/stores/CurrentConversationSlice";
+import { useSocket } from "@/stores/SocketContext";
 
 const MESSAGE_URL = "/messages";
 
 export default function useMessageActions() {
    const [isFetching, setIsFetching] = useState(false);
+
+   // hooks
+   const dispatch = useDispatch();
+   const { socket } = useSocket();
 
    const privateRequest = usePrivateRequest();
 
@@ -25,10 +32,18 @@ export default function useMessageActions() {
 
    const sendMessage = async (message: MessageSchema) => {
       try {
+         if (!socket) return;
+
          const res = await privateRequest.post(MESSAGE_URL, message);
          const newMessage = res.data.data as Message;
 
-         return newMessage;
+         dispatch(
+            storingConversation({
+               messages: [newMessage],
+            })
+         );
+
+         socket.send(JSON.stringify(newMessage));
       } catch (error) {
          console.log({ message: error });
       }

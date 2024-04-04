@@ -36,7 +36,7 @@ type Message = {
    from_user_id: number;
    conversation_id: number;
    sent_at: string;
-   from_user: User;
+   // from_user: User;
 };
 
 type MessageSchema = Omit<Message, "id" | "sent_at" | "from_user">;

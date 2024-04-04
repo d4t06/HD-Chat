@@ -1,27 +1,23 @@
 import { PaperAirplaneIcon, PhotoIcon } from "@heroicons/react/24/outline";
 import Button from "./ui/Button";
-import { Dispatch, FormEvent, useState } from "react";
+import { FormEvent, useState } from "react";
 import { useSocket } from "@/stores/SocketContext";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { selectCurrentConversation } from "@/stores/CurrentConversationSlice";
 import useMessageActions from "@/hooks/useMessageActions";
-import useConversationActions from "@/hooks/useConversationActions";
-
-// type Props = {
-//    isNewConversation: boolean;
-//    setMessages: Dispatch<SetStateAction<Message[]>>;
-// };
+import useSendMessageToNewConversation from "@/hooks/useNewConversation";
+import { useAuth } from "@/stores/AuthContext";
 
 export default function ChatInput() {
    const [message, setMessage] = useState("");
 
    //hooks
-   const dispatch = useDispatch();
-   const { currentConversationInStore, messages, tempUser } =
-      useSelector(selectCurrentConversation);
+   const { auth } = useAuth();
+   const { currentConversationInStore } = useSelector(selectCurrentConversation);
    const { socket } = useSocket();
-   const {sendMessage} = useMessageActions()
-   const {createConversation} =useConversationActions()
+   const { sendMessage } = useMessageActions();
+
+   const { sendMessageToNewConversation } = useSendMessageToNewConversation();
 
    const clear = () => setMessage("");
 
@@ -29,12 +25,20 @@ export default function ChatInput() {
       e.preventDefault();
       if (!socket) return;
 
-      // 
-      if (!currentConversationInStore && tempUser) {
-
+      if (!currentConversationInStore) {
+         sendMessageToNewConversation(message);
+      } else {
+         if (auth) {
+            const messageSchema: MessageSchema = {
+               conversation_id: currentConversationInStore.id,
+               content: message,
+               from_user_id: auth.id,
+               type: "text",
+            };
+            sendMessage(messageSchema);
+         }
       }
 
-      socket.send(JSON.stringify({ name: "asdf", content: message }));
       clear();
    };
 
