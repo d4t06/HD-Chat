@@ -1,17 +1,18 @@
-import { useState, useMemo, useEffect } from "react";
+import { useMemo, useEffect } from "react";
 import { useConversation } from "@/stores/ConversationContext";
 import useMessageActions from "./useMessageActions";
+import { useDispatch, useSelector } from "react-redux";
+import { selectCurrentConversation, storingConversation } from "@/stores/CurrentConversationSlice";
 
 type Props = {
-   searchParams: URLSearchParams;
    conversation_id?: string;
 };
 
-export default function useCurrentConversation({ searchParams, conversation_id }: Props) {
-   const [isFetching, setIsFetching] = useState(true);
-   const [messages, setMessages] = useState<Message[]>([]);
-
+export default function useCurrentConversation({ conversation_id }: Props) {
    // hooks
+   const dispatch = useDispatch();
+   const { status } = useSelector(selectCurrentConversation);
+
    const { conversations } = useConversation();
    const { getCurrentConversationMessages } = useMessageActions();
 
@@ -21,29 +22,55 @@ export default function useCurrentConversation({ searchParams, conversation_id }
       }
    };
 
-   const currentConversation = useMemo(
-      () => getCurrentConversation(),
-      [searchParams, conversation_id]
-   );
+   const currentConversation = useMemo(() => getCurrentConversation(), [conversation_id]);
 
-   const handleGetCurrentMessage = async () => {
+   const handleInitConversation = async () => {
+      console.log("run init conversion");
+
       try {
-         if (currentConversation) {
-            const messages = await getCurrentConversationMessages(currentConversation.id);
-            if (messages) setMessages(messages);
+         // if found conversation
+         if (conversation_id && currentConversation) {
+            dispatch(
+               storingConversation({
+                  currentConversationInStore: currentConversation,
+               })
+            );
+
+            const messages = await getCurrentConversationMessages(+conversation_id);
+
+            dispatch(
+               storingConversation({
+                  messages,
+                  status: "successful",
+               })
+            );
+
+            // if no have conversation
+         } else {
+            dispatch(
+               storingConversation({
+                  status: "successful",
+               })
+            );
          }
       } catch (error) {
-         console.log({ messages: error });
-      } finally {
-         setIsFetching(false);
+         console.log({ message: error });
+         dispatch(
+            storingConversation({
+               status: "error",
+            })
+         );
       }
    };
 
    useEffect(() => {
-      if (currentConversation) {
-         handleGetCurrentMessage();
-      } else setTimeout(() => setIsFetching(false), 1000);
-   });
+      if (status === "successful") return;
 
-   return { currentConversation, isFetching, messages };
+      handleInitConversation();
+
+      return () => {
+         // if user change to another conversation
+         dispatch(storingConversation({ status: "loading", tempUser: null }));
+      };
+   }, [conversation_id]);
 }

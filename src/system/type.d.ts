@@ -13,15 +13,21 @@ type Member = {
    conversation_id: number;
    joined_at: string;
    left_at: string;
-   is_owner: string;
+   is_owner: boolean;
    user: User;
 };
+
+type MemberSchema = Omit<Member, "user" | "joined_at" | "left_at">;
 
 type Conversation = {
    id: number;
    name: string;
    members: Member[];
 };
+
+type ConversationSchema = Omit<Conversation, "id" | "members"> & {};
+
+type NewConversation = {};
 
 type Message = {
    id: number;
@@ -32,3 +38,5 @@ type Message = {
    sent_at: string;
    from_user: User;
 };
+
+type MessageSchema = Omit<Message, "id" | "sent_at" | "from_user">;

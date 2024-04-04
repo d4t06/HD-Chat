@@ -2,27 +2,41 @@ import { useState } from "react";
 import Button from "../../components/ui/Button";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import AccountItem from "../../components/AccountItem";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/stores/AuthContext";
 import Search from "./Search";
 import { useConversation } from "@/stores/ConversationContext";
 import ConversationItem from "@/components/ConversationItem";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/Popover";
 import AccountMenu from "@/components/AccountMenu";
+import { useDispatch } from "react-redux";
+import { storingConversation } from "@/stores/CurrentConversationSlice";
 
 export default function Sidebar({ id: conversation_id }: { id?: string }) {
    const [searchResult, setResult] = useState<User[]>([]);
 
    // hooks
+   const dispatch = useDispatch();
    const { auth, loading } = useAuth();
    const { conversations } = useConversation();
+   const navigate = useNavigate();
+
+   const handleNewConversation = (u: User) => {
+      dispatch(
+         storingConversation({
+            tempUser: u,
+            status: "successful",
+         })
+      );
+
+      navigate("/conversation/new");
+   };
 
    const classes = {
       container: "w-[70px] sm:w-[360px] flex-shrink-0 border-r h-screen overflow-hidden",
       button: "p-[4px]",
       header: "flex justify-center sm:justify-between items-center",
-      conversationList:
-         "flex flex-col h-[calc(100vh-7.25rem)] overflow-y-auto no-scrollbar",
+      conversationList: "flex flex-col h-[calc(100vh-7.25rem)] overflow-y-auto no-scrollbar",
    };
 
    return (
@@ -35,11 +49,7 @@ export default function Sidebar({ id: conversation_id }: { id?: string }) {
                   <Popover placement="bottom-start">
                      <PopoverTrigger>
                         {auth && (
-                           <AccountItem
-                              active={true}
-                              type="default"
-                              fullName={auth.fullName}
-                           />
+                           <AccountItem active={true} type="default" fullName={auth.fullName} />
                         )}
                      </PopoverTrigger>
 
@@ -72,13 +82,14 @@ export default function Sidebar({ id: conversation_id }: { id?: string }) {
             <div className={classes.conversationList}>
                {!!searchResult.length &&
                   searchResult.map((u, index) => (
-                     <Link
+                     <button
                         key={index}
-                        to={`/conversation/null?name=${u.fullName}&userID=${u.id}`}
+                        onClick={() => handleNewConversation(u)}
+                        // to={`/conversation/null?name=${u.fullName}&userID=${u.id}`}
                         className={`hover:bg-[#f3f3f5] p-2 sm:px-4`}
                      >
                         <AccountItem type="default" fullName={u.fullName} />
-                     </Link>
+                     </button>
                   ))}
 
                {conversations.map((c, index) => (
@@ -90,9 +101,7 @@ export default function Sidebar({ id: conversation_id }: { id?: string }) {
                      {loading ? (
                         <AccountItem type="loading" />
                      ) : (
-                        <>
-                           {auth && <ConversationItem type="default" c={c} auth={auth} />}
-                        </>
+                        <>{auth && <ConversationItem type="default" c={c} auth={auth} />}</>
                      )}
                   </Link>
                ))}

@@ -9,8 +9,6 @@ import {
 } from "react";
 import { useAuth } from "./AuthContext";
 
-import { Socket, io } from "socket.io-client";
-
 type StateType = {
    onlineUsers: string[];
    socket: WebSocket | null;
@@ -45,20 +43,18 @@ const SocketProvider = ({ children }: { children: ReactNode }) => {
    useEffect(() => {
       if (loading || !auth) return;
 
-      // const socket = io("ws://localhost:8080", {
-      //    path: "/ws",
-      //    query: {
-      //       userId: auth.fullName,
-      //    },
-      // });
+      let ws: WebSocket;
 
-      const ws = new WebSocket("ws://localhost:8080/ws");
+      const handleInitSocketJS = async () => {
+         try {
+            ws = new WebSocket("ws://localhost:8080/ws");
+            setSocket(ws);
+         } catch (error) {
+            console.log({ message: error });
+         }
+      };
 
-      // ws.onopen = () => {
-      //    console.log("open")
-      // }
-
-      setSocket(ws);
+      handleInitSocketJS();
 
       return () => {
          ws.close();
@@ -66,9 +62,7 @@ const SocketProvider = ({ children }: { children: ReactNode }) => {
    }, [loading, auth]);
 
    return (
-      <SocketContext.Provider
-         value={{ state: { socket, onlineUsers }, setOnlineUsers, setSocket }}
-      >
+      <SocketContext.Provider value={{ state: { socket, onlineUsers }, setOnlineUsers, setSocket }}>
          {children}
       </SocketContext.Provider>
    );

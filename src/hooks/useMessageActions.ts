@@ -23,8 +23,15 @@ export default function useMessageActions() {
       }
    };
 
-   const sendMessage = async () => {
-      console.log("sent message");
+   const sendMessage = async (message: MessageSchema) => {
+      try {
+         const res = await privateRequest.post(MESSAGE_URL, message);
+         const newMessage = res.data.data as Message;
+
+         return newMessage;
+      } catch (error) {
+         console.log({ message: error });
+      }
    };
 
    return {

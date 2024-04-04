@@ -3,7 +3,7 @@ import currentConversation from "./CurrentConversationSlice";
 
 const store = configureStore({
    reducer: {
-      products: currentConversation,
+      currentConversation: currentConversation,
    },
 });
 
