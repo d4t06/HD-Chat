@@ -7,6 +7,8 @@ import { useAuth } from "@/stores/AuthContext";
 import Search from "./Search";
 import { useConversation } from "@/stores/ConversationContext";
 import ConversationItem from "@/components/ConversationItem";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/Popover";
+import AccountMenu from "@/components/AccountMenu";
 
 export default function Sidebar({ id: conversation_id }: { id?: string }) {
    const [searchResult, setResult] = useState<User[]>([]);
@@ -30,10 +32,8 @@ export default function Sidebar({ id: conversation_id }: { id?: string }) {
             <div className="px-2 sm:px-4 pt-2 sm:pb-[16px]">
                {/* header */}
                <div className={classes.header}>
-                  {loading ? (
-                     <AccountItem type="loading" />
-                  ) : (
-                     <>
+                  <Popover placement="bottom-start">
+                     <PopoverTrigger>
                         {auth && (
                            <AccountItem
                               active={true}
@@ -41,8 +41,13 @@ export default function Sidebar({ id: conversation_id }: { id?: string }) {
                               fullName={auth.fullName}
                            />
                         )}
-                     </>
-                  )}
+                     </PopoverTrigger>
+
+                     <PopoverContent>
+                        <AccountMenu />
+                     </PopoverContent>
+                  </Popover>
+
                   <div className="hidden sm:flex">
                      <Button
                         className={classes.button}

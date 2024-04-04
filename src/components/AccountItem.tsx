@@ -40,7 +40,7 @@ export default function AccountItem({ size = "primary", ...props }: AccountItemP
                fullName={fullName}
             />
             <div className="ml-[10px] hidden sm:block">
-               <p className="text-[16px] leading-[20px]">{fullName}</p>
+               <p className="leading-[20px] font-[500] text-[#1f1f1f]">{fullName}</p>
                {desc && <p className="text-[14px] text-[#808080]">{desc}</p>}
             </div>
          </div>

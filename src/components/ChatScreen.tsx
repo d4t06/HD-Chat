@@ -5,6 +5,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import useCurrentConversation from "@/hooks/useCurrentConversation";
 import ConversationItem from "./ConversationItem";
 import { useAuth } from "@/stores/AuthContext";
+import ChatInput from "./ChatInput";
 
 type Props = {};
 
@@ -12,8 +13,7 @@ export default function ChatScreen(props: Props) {
    const classes = {
       container: "h-screen overflow-hidden relative",
       button: "p-[4px]",
-      chatBarContainer:
-         "p-2 sm:p-4 border-t absolute bottom-0 left-0 right-0 z-10 bg-white",
+      chatBarContainer: "absolute bottom-0 left-0 right-0 z-10 bg-white",
    };
 
    const params = useParams();
@@ -77,34 +77,7 @@ export default function ChatScreen(props: Props) {
 
          {/* chat input */}
          <div className={classes.chatBarContainer}>
-            <div className="flex items-center">
-               <Button
-                  className={classes.button}
-                  variant={"push"}
-                  size={"clear"}
-                  colors="secondary"
-               >
-                  <PhotoIcon className="w-[22px]" />
-               </Button>
-               <input
-                  className="h-[36px] ml-[10px] flex-grow border-[2px] border-[#ccc] bg-[#f3f3f5] rounded-full px-2 sm:px-4 outline-none"
-                  placeholder="Message..."
-                  type="text"
-                  //   value={inputValue}
-                  //   onChange={(e) => setInputValue(e.target.value)}
-                  //   onKeyDown={(e) => handleSendMessage(e)}
-                  // value={mess}
-               />
-
-               <Button
-                  className={`h-[34px] w-[34px] ml-[10px]`}
-                  variant={"push"}
-                  size={"clear"}
-                  colors="secondary"
-               >
-                  <span>&#128075;</span>
-               </Button>
-            </div>
+            <ChatInput />
          </div>
       </div>
    );

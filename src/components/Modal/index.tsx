@@ -7,7 +7,7 @@ type Props = {
    zIndex?: string;
 };
 
-export default function Modal({ close, children, zIndex }: Props) {
+export default function Modal({ close, children, zIndex = 'z-[99]' }: Props) {
    return createPortal(
       <>
          <div onClick={close} className={`fixed inset-0 bg-black/60 ${zIndex}`}></div>
