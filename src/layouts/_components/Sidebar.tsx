@@ -5,7 +5,6 @@ import AccountItem from "../../components/AccountItem";
 import { useAuth } from "@/stores/AuthContext";
 import Search from "./Search";
 import { useConversation } from "@/stores/ConversationContext";
-import ConversationItem from "@/components/ConversationItem";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/Popover";
 import AccountMenu from "@/components/AccountMenu";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,6 +12,7 @@ import {
    selectCurrentConversation,
    storingConversation,
 } from "@/stores/CurrentConversationSlice";
+import SidebarConversationItem from "@/components/SidebarConversationItem";
 
 export default function Sidebar() {
    const [searchResult, setResult] = useState<User[]>([]);
@@ -51,19 +51,22 @@ export default function Sidebar() {
                storingConversation({
                   currentConversationInStore: null,
                   tempUser: props.user,
+                  messages: [],
+                  messageStatus: "successful",
+                  replace: true,
                })
             );
       }
    };
 
    const classes = {
-      container: "w-[70px] sm:w-[360px] flex-shrink-0 border-r h-screen overflow-hidden",
+      container: "relative w-[70px] sm:w-[360px] flex-shrink-0 border-r h-screen",
       button: "p-[4px]",
       header: "flex justify-center sm:justify-between items-center",
       conversationList:
-         "flex flex-col h-[calc(100vh-7.25rem)] overflow-y-auto no-scrollbar",
+         "absolute top-[60px] sm:top-[130px] bottom-0 left-0 right-0 flex flex-col no-scrollbar overflow-y-auto",
       activeConversation: "!bg-[#c2e7ff]",
-      conversationItem: "hover:bg-[#f3f3f5] p-2 sm:px-4",
+      conversationItem: "hover:bg-[#f3f3f5] p-2 sm:px-4 w-full",
    };
 
    const conversationSkeleton = useMemo(
@@ -77,38 +80,52 @@ export default function Sidebar() {
    );
 
    const renderConversations = useMemo(() => {
+      if (!auth) return;
+
       if (!!conversations.length && !searchResult.length)
-         return conversations.map((c, index) => (
-            <button
-               key={index}
-               className={`${classes.conversationItem} ${
-                  currentConversationInStore?.id == c.id ? classes.activeConversation : ""
-               }`}
-               onClick={() =>
-                  handleActiveConversation({ type: "default", conversation: c })
-               }
-            >
-               {auth && <ConversationItem type="default" c={c} auth={auth} />}
-            </button>
-         ));
+         return conversations.map((c, index) => {
+            const isActive = currentConversationInStore?.id == c.id;
+
+            return (
+               <SidebarConversationItem
+                  cb={() =>
+                     !isActive
+                        ? handleActiveConversation({ type: "default", conversation: c })
+                        : {}
+                  }
+                  auth={auth}
+                  key={index}
+                  active={isActive}
+                  conversation={c}
+               />
+            );
+         });
    }, [conversations, currentConversationInStore, searchResult]);
 
    const renderSearchResult = useMemo(
       () =>
          !!searchResult.length &&
-         searchResult.map((u, index) => (
-            <button
-               key={index}
-               onClick={() => handleActiveConversation({ type: "new", user: u })}
-               className={`${classes.conversationItem} ${
-                  tempUser?.id === u.id ? classes.activeConversation : ""
-               }`}
-            >
-               <AccountItem type="default" fullName={u.fullName} />
-            </button>
-         )),
+         searchResult.map((u, index) => {
+            const isActive = tempUser?.id === u.id;
+
+            return (
+               <div
+                  key={index}
+                  onClick={() =>
+                     !isActive ? handleActiveConversation({ type: "new", user: u }) : {}
+                  }
+                  className={`${classes.conversationItem} ${
+                     isActive ? classes.activeConversation : ""
+                  }`}
+               >
+                  <AccountItem type="default" fullName={u.fullName} />
+               </div>
+            );
+         }),
       [searchResult, tempUser]
    );
+
+   console.log("check conversation", conversations, currentConversationInStore);
 
    return (
       <>

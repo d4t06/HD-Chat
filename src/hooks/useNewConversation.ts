@@ -1,4 +1,7 @@
-import { selectCurrentConversation, storingConversation } from "@/stores/CurrentConversationSlice";
+import {
+   selectCurrentConversation,
+   storingConversation,
+} from "@/stores/CurrentConversationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import useMessageActions from "./useMessageActions";
 import useConversationActions from "./useConversationActions";
@@ -10,7 +13,7 @@ export default function useSendMessageToNewConversation() {
    const dispatch = useDispatch();
 
    const { auth } = useAuth();
-   const { setConversations } = useConversation();
+   const { setConversations, conversations } = useConversation();
 
    const { tempUser } = useSelector(selectCurrentConversation);
 
@@ -45,17 +48,21 @@ export default function useSendMessageToNewConversation() {
          const m1 = await addMember(ownerMember);
          const m2 = await addMember(member);
 
-         if (m1 && m2) {
-            c.members = [m1, m2];
+         if (!m1 || !m2) throw new Error("member not found");
 
-            setConversations((prev) => [c, ...prev]);
+         m2["user"] = tempUser;
 
-            dispatch(
-               storingConversation({
-                  currentConversationInStore: c,
-               })
-            );
-         }
+         c["members"] = [m1, m2];
+
+         const newConversations = [c, ...conversations];
+         setConversations(newConversations);
+
+         dispatch(
+            storingConversation({
+               currentConversationInStore: c,
+               tempUser: null,
+            })
+         );
 
          await sendMessage(firstMessage);
       } catch (error) {

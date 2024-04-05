@@ -20,5 +20,9 @@ export default function useConversationActions() {
       return res.data.data as Conversation;
    };
 
-   return { createConversation, getAllUserConversations };
+   const deleteConversation = () => {
+      console.log("delete conversation");
+   };
+
+   return { createConversation, getAllUserConversations, deleteConversation };
 }

@@ -41,6 +41,7 @@ export default function useCurrentConversationMessage() {
       }
    };
 
+   // problem after send new message to new user auto set status = loading
    useEffect(() => {
       if (getConversationStatus === "loading" || getConversationStatus === "error")
          return;
@@ -53,10 +54,10 @@ export default function useCurrentConversationMessage() {
          );
       } else handleInitConversation();
 
-      return () => {
-         dispatch(
-            storingConversation({ messageStatus: "loading", messages: [], replace: true })
-         );
-      };
+      // return () => {
+      //    dispatch(
+      //       storingConversation({ messageStatus: "loading", messages: [], replace: true })
+      //    );
+      // };
    }, [currentConversationInStore, tempUser]);
 }

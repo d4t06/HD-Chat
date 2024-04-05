@@ -6,6 +6,7 @@ type ThemeType = {
 type User = {
    id: number;
    fullName: string;
+   last_seen: Date;
 };
 
 type Member = {
@@ -32,11 +33,10 @@ type NewConversation = {};
 type Message = {
    id: number;
    content: string;
-   type: string;
+   type: "text" | "image" | "emoji" | "system-log";
    from_user_id: number;
    conversation_id: number;
    sent_at: string;
-   // from_user: User;
 };
 
 type MessageSchema = Omit<Message, "id" | "sent_at" | "from_user">;

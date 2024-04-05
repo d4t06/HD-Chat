@@ -52,12 +52,12 @@ export default function ChatScreen() {
             <>
                {currentConversationInStore ? (
                   <ConversationItem
+                     in="chat-scrren"
                      keepNameInSmall={true}
                      type="default"
                      auth={auth}
                      c={currentConversationInStore}
                      size="small"
-                     desc="1 hour ago"
                   />
                ) : (
                   <>

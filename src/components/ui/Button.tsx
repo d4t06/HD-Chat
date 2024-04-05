@@ -37,7 +37,6 @@ const buttonVariant = cva(
          },
       },
 
-      // before:shadow-[0_4px_0_#9e010d]
       defaultVariants: {
          variant: "primary",
          size: "primary",

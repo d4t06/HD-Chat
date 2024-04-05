@@ -5,3 +5,6 @@ export const sleep = (time: number) =>
       }, time);
    });
 
+// export const convertFirestoreTimestampToString = (data) => {
+//    return new Date(timeStamp.toDate().getTime()).toLocaleString();
+// };

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Modal from "./Modal";
 import ConfirmModal from "./Modal/ConfirmModal";
 import useLogout from "@/hooks/useLogout";
+import MenuItem from "./ui/MenuItem";
 
 export default function AccountMenu() {
    const [openModal, setOpenModal] = useState(false);
@@ -13,18 +14,16 @@ export default function AccountMenu() {
    const closeModal = () => setOpenModal(false);
 
    const classes = {
-      menuItem: `hover:bg-[#f3f3f5]  rounded-[4px] w-full px-[10px] h-[44px] inline-flex items-center`,
-      icon: "w-[25px] mr-[5px]",
-      divide: `h-[1px]  w-[calc(100%-20px)] mb-[10px] mt-[20px] mx-auto bg-[#ccc]`,
+      icon: "w-[22px] mr-[5px]",
    };
 
    return (
       <>
          <PopupWrapper variant={"thin"}>
-            <button className={`${classes.menuItem}`} onClick={() => setOpenModal(true)}>
+            <MenuItem cb={() => setOpenModal(true)}>
                <ArrowRightStartOnRectangleIcon className={classes.icon} />
                Log out
-            </button>
+            </MenuItem>
          </PopupWrapper>
 
          {openModal && (

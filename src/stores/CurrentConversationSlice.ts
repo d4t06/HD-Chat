@@ -40,6 +40,9 @@ const currentConversationSlice = createSlice({
             messages: [...state.messages, ...(payload.messages || [])],
          });
       },
+      reset: (state, _action: PayloadAction<undefined>) => {
+         return Object.assign(state, initState);
+      },
    },
 });
 
@@ -47,8 +50,8 @@ const selectCurrentConversation = (state: { currentConversation: StateType }) =>
    return state.currentConversation;
 };
 
-const { storingConversation } = currentConversationSlice.actions;
+const { storingConversation, reset } = currentConversationSlice.actions;
 
-export { selectCurrentConversation, storingConversation };
+export { selectCurrentConversation, reset, storingConversation };
 
 export default currentConversationSlice.reducer;

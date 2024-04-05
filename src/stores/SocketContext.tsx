@@ -47,7 +47,7 @@ const SocketProvider = ({ children }: { children: ReactNode }) => {
 
       const handleInitSocketJS = async () => {
          try {
-            ws = new WebSocket("ws://localhost:8080/ws");
+            ws = new WebSocket("ws://localhost:8080/ws/"+auth.id);
 
             setSocket(ws);
          } catch (error) {
