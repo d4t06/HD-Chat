@@ -13,17 +13,27 @@ export type AccountItemProps = {
 type Loading = {
    type: "loading";
    size?: "primary" | "small";
+   className?: string;
 };
 
-export default function AccountItem({ size = "primary", ...props }: AccountItemProps | Loading) {
-   if (props.type === "loading") return;
-   <div className="flex justify-center sm:justify-start">
-      <AvatarPlaceholder type="loading" size={size} />
-      <div className="ml-[10p]">
-         <Skeleton className="h-[22px] w-[100px]" />
-         <Skeleton className="h-[22px] w-[60px]" />
-      </div>
-   </div>;
+export default function AccountItem({
+   size = "primary",
+   ...props
+}: AccountItemProps | Loading) {
+   if (props.type === "loading")
+      return (
+         <div className="flex justify-center sm:justify-start">
+            <AvatarPlaceholder
+               type="loading"
+               className={props.className || ""}
+               size={size}
+            />
+            <div className="ml-[10px]">
+               <Skeleton className="h-[20px] w-[200px]" />
+               <Skeleton className="h-[16px] w-[60px] mt-[4px]" />
+            </div>
+         </div>
+      );
 
    if (props.type === "default") {
       const { fullName, className, desc, active } = props;

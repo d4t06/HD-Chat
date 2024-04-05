@@ -27,6 +27,7 @@ type ContextType = {
 export type AuthResponse = {
    userInfo: {
       fullName: string;
+      id: number;
    };
    token: string;
 };

@@ -1,5 +1,9 @@
-
+import ChatScreen from "@/components/ChatScreen";
 
 export default function HomePage() {
-    return <p>This is home page</p>
+   return (
+      <div className="w-full">
+         <ChatScreen />
+      </div>
+   );
 }

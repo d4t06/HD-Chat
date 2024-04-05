@@ -1,43 +1,117 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Button from "../../components/ui/Button";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import AccountItem from "../../components/AccountItem";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/stores/AuthContext";
 import Search from "./Search";
 import { useConversation } from "@/stores/ConversationContext";
 import ConversationItem from "@/components/ConversationItem";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/Popover";
 import AccountMenu from "@/components/AccountMenu";
-import { useDispatch } from "react-redux";
-import { storingConversation } from "@/stores/CurrentConversationSlice";
+import { useDispatch, useSelector } from "react-redux";
+import {
+   selectCurrentConversation,
+   storingConversation,
+} from "@/stores/CurrentConversationSlice";
 
-export default function Sidebar({ id: conversation_id }: { id?: string }) {
+export default function Sidebar() {
    const [searchResult, setResult] = useState<User[]>([]);
 
    // hooks
    const dispatch = useDispatch();
-   const { auth, loading } = useAuth();
-   const { conversations } = useConversation();
-   const navigate = useNavigate();
+   const { auth } = useAuth();
+   const { conversations, status } = useConversation();
+   const { currentConversationInStore, tempUser } = useSelector(
+      selectCurrentConversation
+   );
 
-   const handleNewConversation = (u: User) => {
-      dispatch(
-         storingConversation({
-            tempUser: u,
-            status: "successful",
-         })
-      );
+   type Default = {
+      type: "default";
+      conversation: Conversation;
+   };
 
-      navigate("/conversation/new");
+   type NewConversation = {
+      type: "new";
+      user: User;
+   };
+
+   const handleActiveConversation = (props: Default | NewConversation) => {
+      switch (props.type) {
+         case "default":
+            dispatch(
+               storingConversation({
+                  currentConversationInStore: props.conversation,
+                  tempUser: null,
+               })
+            );
+
+            break;
+         case "new":
+            dispatch(
+               storingConversation({
+                  currentConversationInStore: null,
+                  tempUser: props.user,
+               })
+            );
+      }
    };
 
    const classes = {
       container: "w-[70px] sm:w-[360px] flex-shrink-0 border-r h-screen overflow-hidden",
       button: "p-[4px]",
       header: "flex justify-center sm:justify-between items-center",
-      conversationList: "flex flex-col h-[calc(100vh-7.25rem)] overflow-y-auto no-scrollbar",
+      conversationList:
+         "flex flex-col h-[calc(100vh-7.25rem)] overflow-y-auto no-scrollbar",
+      activeConversation: "!bg-[#c2e7ff]",
+      conversationItem: "hover:bg-[#f3f3f5] p-2 sm:px-4",
    };
+
+   const conversationSkeleton = useMemo(
+      () =>
+         [...Array(5).keys()].map((key) => (
+            <div className={classes.conversationItem}>
+               <AccountItem key={key} type="loading" className="rounded-[99px]" />
+            </div>
+         )),
+      []
+   );
+
+   const renderConversations = useMemo(() => {
+      if (!!conversations.length)
+         return conversations.map((c, index) => (
+            <button
+               key={index}
+               className={`${classes.conversationItem} ${
+                  currentConversationInStore?.id == c.id ? classes.activeConversation : ""
+               }`}
+               onClick={() =>
+                  handleActiveConversation({ type: "default", conversation: c })
+               }
+            >
+               {auth && <ConversationItem type="default" c={c} auth={auth} />}
+            </button>
+         ));
+
+      return <p>No conversation jet...</p>;
+   }, [conversations, currentConversationInStore]);
+
+   const renderSearchResult = useMemo(
+      () =>
+         !!searchResult.length &&
+         searchResult.map((u, index) => (
+            <button
+               key={index}
+               onClick={() => handleActiveConversation({ type: "new", user: u })}
+               className={`${classes.conversationItem} ${
+                  tempUser?.id === u.id ? classes.activeConversation : ""
+               }`}
+            >
+               <AccountItem type="default" fullName={u.fullName} />
+            </button>
+         )),
+      [searchResult, tempUser]
+   );
 
    return (
       <>
@@ -49,7 +123,11 @@ export default function Sidebar({ id: conversation_id }: { id?: string }) {
                   <Popover placement="bottom-start">
                      <PopoverTrigger>
                         {auth && (
-                           <AccountItem active={true} type="default" fullName={auth.fullName} />
+                           <AccountItem
+                              active={true}
+                              type="default"
+                              fullName={auth.fullName}
+                           />
                         )}
                      </PopoverTrigger>
 
@@ -80,31 +158,19 @@ export default function Sidebar({ id: conversation_id }: { id?: string }) {
 
             {/*  conversation list */}
             <div className={classes.conversationList}>
-               {!!searchResult.length &&
-                  searchResult.map((u, index) => (
-                     <button
-                        key={index}
-                        onClick={() => handleNewConversation(u)}
-                        // to={`/conversation/null?name=${u.fullName}&userID=${u.id}`}
-                        className={`hover:bg-[#f3f3f5] p-2 sm:px-4`}
-                     >
-                        <AccountItem type="default" fullName={u.fullName} />
-                     </button>
-                  ))}
-
-               {conversations.map((c, index) => (
-                  <Link
-                     key={index}
-                     to={`/conversation/${c.id}`}
-                     className={`hover:bg-[#f3f3f5] p-2 sm:px-4`}
-                  >
-                     {loading ? (
-                        <AccountItem type="loading" />
+               {status === "loading" && conversationSkeleton}
+               {status !== "loading" && (
+                  <>
+                     {status === "successful" ? (
+                        <>
+                           {renderSearchResult}
+                           {renderConversations}
+                        </>
                      ) : (
-                        <>{auth && <ConversationItem type="default" c={c} auth={auth} />}</>
+                        <p>Some thing went wrong</p>
                      )}
-                  </Link>
-               ))}
+                  </>
+               )}
             </div>
          </div>
       </>

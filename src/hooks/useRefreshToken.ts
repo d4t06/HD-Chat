@@ -12,9 +12,12 @@ const useRefreshToken = () => {
             withCredentials: true,
          });
 
-         setAuth(() => {
-            const data = response.data.data as AuthResponse;
-            return { fullName: data.userInfo.fullName, token: data.token };
+         const data = response.data.data as AuthResponse;
+
+         setAuth({
+            fullName: data.userInfo.fullName,
+            id: data.userInfo.id,
+            token: data.token,
          });
          return response.data.token;
       } catch (error) {

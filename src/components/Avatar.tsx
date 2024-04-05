@@ -7,6 +7,7 @@ const avatarVariant = cva("", {
       size: {
          primary: "h-[44px] w-[44px] text-[24px]",
          small: "h-[40px] w-[40px] text-[22px]",
+         tiny: 'h-[28px] w-[28px] text-[16px]'
       },
    },
    defaultVariants: {
@@ -31,7 +32,8 @@ export default function AvatarPlaceholder({ size, ...props }: Props | LoadingPro
       frame: "w-full h-full rounded-[99px] flex items-center justify-center",
    };
 
-   if (props.type === "loading") return <Skeleton className={avatarVariant({ size })} />;
+   if (props.type === "loading")
+      return <Skeleton className={avatarVariant({ size, className: props.className })} />;
 
    if (props.type === "default") {
       const { fullName, active, className = "" } = props;
@@ -39,7 +41,9 @@ export default function AvatarPlaceholder({ size, ...props }: Props | LoadingPro
       const color = generateHSL(fullName);
 
       return (
-         <div className={avatarVariant({ size, className: className || "" + " relative" })}>
+         <div
+            className={avatarVariant({ size, className: className || "" + " relative" })}
+         >
             <div style={{ backgroundColor: color }} className={classes.frame}>
                <p className="text-[#fff]">{fullName.charAt(0)}</p>
                {active && (

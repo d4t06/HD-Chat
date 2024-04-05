@@ -1,7 +1,7 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 type StateType = {
-   status: "" | "loading" | "more-loading" | "successful" | "error";
+   messageStatus: "" | "loading" | "more-loading" | "successful" | "error";
    currentConversationInStore: Conversation | null;
    messages: Message[];
    tempUser: User | null;
@@ -15,7 +15,7 @@ const initState: StateType = {
    messages: [],
    page: 0,
    size: 20,
-   status: "loading",
+   messageStatus: "loading",
    isNewConversation: false,
    tempUser: null,
 };
@@ -35,7 +35,7 @@ const currentConversationSlice = createSlice({
 
          return Object.assign(state, {
             ...payload,
-            messages: [...(payload.messages || []), ...state.messages],
+            messages: [...state.messages, ...(payload.messages || [])],
          });
       },
    },
