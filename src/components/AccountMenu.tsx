@@ -1,4 +1,3 @@
-import { useAuth } from "@/stores/AuthContext";
 import PopupWrapper from "./ui/PopupWrapper";
 import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
@@ -30,7 +29,7 @@ export default function AccountMenu() {
 
          {openModal && (
             <Modal close={closeModal}>
-               <ConfirmModal callback={logout} close={close} loading={isFetching} />
+               <ConfirmModal callback={logout} close={closeModal} loading={isFetching} />
             </Modal>
          )}
       </>

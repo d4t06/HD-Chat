@@ -48,6 +48,7 @@ const SocketProvider = ({ children }: { children: ReactNode }) => {
       const handleInitSocketJS = async () => {
          try {
             ws = new WebSocket("ws://localhost:8080/ws");
+
             setSocket(ws);
          } catch (error) {
             console.log({ message: error });
@@ -62,7 +63,9 @@ const SocketProvider = ({ children }: { children: ReactNode }) => {
    }, [loading, auth]);
 
    return (
-      <SocketContext.Provider value={{ state: { socket, onlineUsers }, setOnlineUsers, setSocket }}>
+      <SocketContext.Provider
+         value={{ state: { socket, onlineUsers }, setOnlineUsers, setSocket }}
+      >
          {children}
       </SocketContext.Provider>
    );

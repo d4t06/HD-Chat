@@ -7,7 +7,7 @@ const avatarVariant = cva("", {
       size: {
          primary: "h-[44px] w-[44px] text-[24px]",
          small: "h-[40px] w-[40px] text-[22px]",
-         tiny: 'h-[28px] w-[28px] text-[16px]'
+         tiny: "h-[28px] w-[28px] text-[16px]",
       },
    },
    defaultVariants: {
@@ -20,6 +20,7 @@ interface Props extends VariantProps<typeof avatarVariant> {
    active?: boolean;
    fullName: string;
    className?: string;
+   blank?: boolean; //for message item
 }
 
 interface LoadingProps extends VariantProps<typeof avatarVariant> {
@@ -36,7 +37,7 @@ export default function AvatarPlaceholder({ size, ...props }: Props | LoadingPro
       return <Skeleton className={avatarVariant({ size, className: props.className })} />;
 
    if (props.type === "default") {
-      const { fullName, active, className = "" } = props;
+      const { fullName, active, className = "", blank = false } = props;
 
       const color = generateHSL(fullName);
 
@@ -44,12 +45,14 @@ export default function AvatarPlaceholder({ size, ...props }: Props | LoadingPro
          <div
             className={avatarVariant({ size, className: className || "" + " relative" })}
          >
-            <div style={{ backgroundColor: color }} className={classes.frame}>
-               <p className="text-[#fff]">{fullName.charAt(0)}</p>
-               {active && (
-                  <span className="absolute border-[3px] border-white p-[5px] bg-emerald-400 rounded-full bottom-[0px] right-[-2px]"></span>
-               )}
-            </div>
+            {!blank && (
+               <div style={{ backgroundColor: color }} className={classes.frame}>
+                  <p className="text-[#fff]">{fullName.charAt(0)}</p>
+                  {active && (
+                     <span className="absolute border-[3px] border-white p-[5px] bg-emerald-400 rounded-full bottom-[0px] right-[-2px]"></span>
+                  )}
+               </div>
+            )}
          </div>
       );
    }

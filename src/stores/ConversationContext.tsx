@@ -9,7 +9,7 @@ import {
    useRef,
    useState,
 } from "react";
-import { useAuth } from "./AuthContext";
+import { AuthType, useAuth } from "./AuthContext";
 import { sleep } from "@/utils/appHelper";
 
 type StateType = {
@@ -38,24 +38,18 @@ const ConversationProvider = ({ children }: { children: ReactNode }) => {
    const [conversations, setConversations] = useState<Conversation[]>([]);
    const [status, setStatus] = useState<StateType["status"]>("loading");
 
-   const ranEffect = useRef(false);
-
    const { auth, loading } = useAuth();
 
    const { getAllUserConversations } = useConversationActions();
 
-   const handleGetUserConversations = async () => {
+   const handleGetUserConversations = async (auth: AuthType) => {
       try {
-         if (!auth) return;
-
-         console.log(">>> get conversations");
-
+         console.log(">>> get user conversation");
          await sleep(2000);
          const conversations = await getAllUserConversations(auth.id);
          if (conversations) {
             setConversations(conversations);
          }
-
          setStatus("successful");
       } catch (error) {
          console.log({ message: error });
@@ -65,14 +59,14 @@ const ConversationProvider = ({ children }: { children: ReactNode }) => {
 
    useEffect(() => {
       // app always require auth
-      if (!auth) return;
+      if (!auth || loading) return;
 
-      if (!ranEffect.current) {
-         ranEffect.current = true;
+      handleGetUserConversations(auth);
 
-         handleGetUserConversations();
-      }
-   }, [auth]);
+      return () => {
+         setStatus("loading");
+      };
+   }, [auth, loading]);
 
    return (
       <ConversationContext.Provider

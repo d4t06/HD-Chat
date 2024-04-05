@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Button from "../components/ui/Button";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import axios from "axios";
-import { useAuth } from "../stores/AuthContext";
+import { AuthResponse, useAuth } from "../stores/AuthContext";
 import { sleep } from "../utils/appHelper";
 
 export const classes = {
@@ -19,13 +19,6 @@ export const classes = {
 };
 
 const LOGIN_URL = "http://localhost:8080/auth/login";
-
-type AuthResponse = {
-   userInfo: {
-      fullName: string;
-   };
-   token: string;
-};
 
 export default function LoginPage() {
    const inputRef = useRef<HTMLInputElement>(null);
@@ -49,6 +42,7 @@ export default function LoginPage() {
          setErrorMsg("");
          if (import.meta.env.DEV) await sleep(1000);
 
+         // use request with credential to make server set new cookie
          const response = await axios.post(
             LOGIN_URL,
             {
@@ -61,7 +55,11 @@ export default function LoginPage() {
          );
          const data = response.data.data as AuthResponse;
 
-         setAuth({ fullName: data.userInfo.fullName, token: data.token });
+         setAuth({
+            fullName: data.userInfo.fullName,
+            token: data.token,
+            id: data.userInfo.id,
+         });
 
          return navigate("/");
       } catch (error: any) {
@@ -82,7 +80,9 @@ export default function LoginPage() {
       <div className={classes.container}>
          <form
             onSubmit={handleSubmit}
-            className={`${classes.form} ${isFetching ? "opacity-60 pointer-events-none" : ""}`}
+            className={`${classes.form} ${
+               isFetching ? "opacity-60 pointer-events-none" : ""
+            }`}
          >
             <div className="mt-0 md:mt-[-50px] text-center md:text-left">
                <h1 className={classes.myChat}>
@@ -133,7 +133,10 @@ export default function LoginPage() {
                   </Button>
                   <p className="mt-[20px]">
                      Don't have an account jet ?,
-                     <Link className="text-[#cd1818] hover:underline ml-[4px]" to="/register">
+                     <Link
+                        className="text-[#cd1818] hover:underline ml-[4px]"
+                        to="/register"
+                     >
                         Sign up
                      </Link>
                   </p>

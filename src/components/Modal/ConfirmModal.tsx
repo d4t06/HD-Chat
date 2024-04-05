@@ -1,4 +1,3 @@
-import { Dispatch, SetStateAction } from "react";
 import Button from "../ui/Button";
 import ModalHeader from "./ModalHeader";
 
@@ -18,8 +17,7 @@ export default function ConfirmModal({
    title,
    close,
    buttonLabel,
-   //   reserve,
-   desc = "This action cannot be undone",
+   desc,
    className,
 }: //   children,
 Props) {
@@ -30,6 +28,9 @@ Props) {
          }`}
       >
          <ModalHeader close={close} title={title || "Wait a minute"} />
+         <h5 className="font-[500] text-[18px] text-red-500">
+            {desc || "This action cannot be undone"}
+         </h5>
          <div className="flex gap-[10px] mt-[20px]">
             <Button onClick={close} variant="push" colors="secondary">
                Close

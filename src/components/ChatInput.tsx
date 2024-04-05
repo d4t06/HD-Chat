@@ -31,7 +31,7 @@ export default function ChatInput() {
          if (auth) {
             const messageSchema: MessageSchema = {
                conversation_id: currentConversationInStore.id,
-               content: message,
+               content: message || '&#128075;',
                from_user_id: auth.id,
                type: "text",
             };
@@ -43,7 +43,7 @@ export default function ChatInput() {
    };
 
    const classes = {
-      container: "flex items-center p-2 sm:p-4 border-t",
+      container: "flex h-[60px] items-center p-2 sm:p-4 border-t",
       button: "p-[4px]",
       input: "flex-grow h-[36px] ml-[10px] font-[500] text-[#1f1f1f] border-[2px] border-[#ccc] bg-[#f3f3f5] rounded-full px-2 sm:px-4 outline-none",
    };

@@ -1,35 +1,34 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import useMessageActions from "./useMessageActions";
 import { useDispatch, useSelector } from "react-redux";
 import {
    selectCurrentConversation,
    storingConversation,
 } from "@/stores/CurrentConversationSlice";
+import { useConversation } from "@/stores/ConversationContext";
 
 export default function useCurrentConversationMessage() {
-   const ranInit = useRef(false);
-
    // hooks
    const dispatch = useDispatch();
-   const { currentConversationInStore } = useSelector(selectCurrentConversation);
-
+   const { status: getConversationStatus } = useConversation();
+   const { currentConversationInStore, tempUser } = useSelector(
+      selectCurrentConversation
+   );
    const { getCurrentConversationMessages } = useMessageActions();
 
    const handleInitConversation = async () => {
       try {
-         if (ranInit.current) return;
          // if found conversation
          if (!currentConversationInStore) return;
 
-         console.log("run init conversion");
          const messages = await getCurrentConversationMessages(
             currentConversationInStore.id
          );
-
          dispatch(
             storingConversation({
                messages,
                messageStatus: "successful",
+               replace: true,
             })
          );
       } catch (error) {
@@ -43,6 +42,9 @@ export default function useCurrentConversationMessage() {
    };
 
    useEffect(() => {
+      if (getConversationStatus === "loading" || getConversationStatus === "error")
+         return;
+
       if (!currentConversationInStore) {
          dispatch(
             storingConversation({
@@ -52,8 +54,9 @@ export default function useCurrentConversationMessage() {
       } else handleInitConversation();
 
       return () => {
-         ranInit.current = false;
-         dispatch(storingConversation({ messageStatus: "loading", tempUser: null }));
+         dispatch(
+            storingConversation({ messageStatus: "loading", messages: [], replace: true })
+         );
       };
-   }, [currentConversationInStore]);
+   }, [currentConversationInStore, tempUser]);
 }

@@ -8,6 +8,7 @@ export type AccountItemProps = {
    className?: string;
    desc?: string;
    active?: boolean;
+   keepNameInSmall?: boolean;
 };
 
 type Loading = {
@@ -28,7 +29,7 @@ export default function AccountItem({
                className={props.className || ""}
                size={size}
             />
-            <div className="ml-[10px]">
+            <div className="ml-[10px] hidden sm:block">
                <Skeleton className="h-[20px] w-[200px]" />
                <Skeleton className="h-[16px] w-[60px] mt-[4px]" />
             </div>
@@ -36,7 +37,7 @@ export default function AccountItem({
       );
 
    if (props.type === "default") {
-      const { fullName, className, desc, active } = props;
+      const { fullName, className, desc, active, keepNameInSmall = false } = props;
       return (
          <div
             className={`flex cursor-pointer justify-center sm:justify-start ${
@@ -49,7 +50,7 @@ export default function AccountItem({
                size={size}
                fullName={fullName}
             />
-            <div className="ml-[10px] hidden sm:block">
+            <div className={`ml-[10px] ${keepNameInSmall ? "" : "hidden sm:block"}`}>
                <p className="leading-[20px] font-[500] text-[#1f1f1f]">{fullName}</p>
                {desc && <p className="text-[14px] text-[#808080]">{desc}</p>}
             </div>

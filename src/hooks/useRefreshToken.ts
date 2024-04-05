@@ -14,6 +14,9 @@ const useRefreshToken = () => {
 
          const data = response.data.data as AuthResponse;
 
+
+         console.log('use refresh set auth');
+         
          setAuth({
             fullName: data.userInfo.fullName,
             id: data.userInfo.id,

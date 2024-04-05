@@ -29,6 +29,8 @@ const currentConversationSlice = createSlice({
    initialState: initState,
    reducers: {
       storingConversation: (state, action: PayloadAction<PayloadType>) => {
+         console.log("storing conversation", action.payload);
+
          const { replace = false, ...payload } = action.payload;
 
          if (replace) return Object.assign(state, payload);

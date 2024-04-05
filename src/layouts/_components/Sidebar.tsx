@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import Button from "../../components/ui/Button";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import AccountItem from "../../components/AccountItem";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/stores/AuthContext";
 import Search from "./Search";
 import { useConversation } from "@/stores/ConversationContext";
@@ -70,15 +69,15 @@ export default function Sidebar() {
    const conversationSkeleton = useMemo(
       () =>
          [...Array(5).keys()].map((key) => (
-            <div className={classes.conversationItem}>
-               <AccountItem key={key} type="loading" className="rounded-[99px]" />
+            <div key={key} className={classes.conversationItem}>
+               <AccountItem type="loading" className="rounded-[99px]" />
             </div>
          )),
       []
    );
 
    const renderConversations = useMemo(() => {
-      if (!!conversations.length)
+      if (!!conversations.length && !searchResult.length)
          return conversations.map((c, index) => (
             <button
                key={index}
@@ -92,9 +91,7 @@ export default function Sidebar() {
                {auth && <ConversationItem type="default" c={c} auth={auth} />}
             </button>
          ));
-
-      return <p>No conversation jet...</p>;
-   }, [conversations, currentConversationInStore]);
+   }, [conversations, currentConversationInStore, searchResult]);
 
    const renderSearchResult = useMemo(
       () =>
@@ -117,7 +114,7 @@ export default function Sidebar() {
       <>
          <div className={classes.container}>
             {/* top */}
-            <div className="px-2 sm:px-4 pt-2 sm:pb-[16px]">
+            <div className="p-2 sm:p-4">
                {/* header */}
                <div className={classes.header}>
                   <Popover placement="bottom-start">
@@ -163,8 +160,14 @@ export default function Sidebar() {
                   <>
                      {status === "successful" ? (
                         <>
-                           {renderSearchResult}
-                           {renderConversations}
+                           {!!conversations.length || !!searchResult.length ? (
+                              <>
+                                 {renderSearchResult}
+                                 {renderConversations}
+                              </>
+                           ) : (
+                              <p className="text-center">No conversation jet...</p>
+                           )}
                         </>
                      ) : (
                         <p>Some thing went wrong</p>
