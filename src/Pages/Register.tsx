@@ -48,7 +48,7 @@ export default function RegisterPage() {
          setIsFetching(true);
          setErrorMsg("")
 
-         if (import.meta.env.DEV) await sleep(1000);
+         if (import.meta.env.DEV) await sleep(500);
          await publicRequest.post(REGISTER_URL, {
             fullName,
             password,

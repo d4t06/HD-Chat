@@ -25,7 +25,7 @@ export default function useSearchUser({ setResult }: Props) {
    const getUsers = async (controller: AbortController) => {
       try {
          setIsFetching(true);
-         if (import.meta.env.DEV) await sleep(1000);
+         if (import.meta.env.DEV) await sleep(500);
 
          const res = await privateRequest.get(`/users/search?q=${q}`, {
             signal: controller.signal,

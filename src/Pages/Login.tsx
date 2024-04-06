@@ -40,7 +40,7 @@ export default function LoginPage() {
 
          setIsFetching(true);
          setErrorMsg("");
-         if (import.meta.env.DEV) await sleep(1000);
+         if (import.meta.env.DEV) await sleep(500);
 
          // use request with credential to make server set new cookie
          const response = await axios.post(

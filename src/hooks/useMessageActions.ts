@@ -19,7 +19,7 @@ export default function useMessageActions() {
    const getCurrentConversationMessages = async (conversation_id: number) => {
       try {
          setIsFetching(true);
-         if (import.meta.env.DEV) await sleep(1000);
+         if (import.meta.env.DEV) await sleep(500);
 
          const res = await privateRequest.get(`${MESSAGE_URL}?conversationID=${conversation_id}`);
          return res.data.data as Message[];
