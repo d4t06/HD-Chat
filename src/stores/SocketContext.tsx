@@ -9,9 +9,12 @@ import {
 } from "react";
 import { useAuth } from "./AuthContext";
 
+import SockJS from "sockjs-client/dist/sockjs.js";
+import { CompatClient, Stomp } from "@stomp/stompjs";
+
 type StateType = {
    onlineUsers: string[];
-   socket: WebSocket | null;
+   socket: CompatClient | null;
 };
 
 const initState: StateType = {
@@ -22,7 +25,7 @@ const initState: StateType = {
 type ContextType = {
    state: StateType;
    setOnlineUsers: Dispatch<SetStateAction<string[]>>;
-   setSocket: Dispatch<SetStateAction<WebSocket | null>>;
+   setSocket: Dispatch<SetStateAction<CompatClient | null>>;
 };
 
 const initContext: ContextType = {
@@ -34,7 +37,7 @@ const initContext: ContextType = {
 const SocketContext = createContext<ContextType>(initContext);
 
 const SocketProvider = ({ children }: { children: ReactNode }) => {
-   const [socket, setSocket] = useState<WebSocket | null>(null);
+   const [socket, setSocket] = useState<CompatClient | null>(null);
    const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
 
    // hooks
@@ -43,13 +46,24 @@ const SocketProvider = ({ children }: { children: ReactNode }) => {
    useEffect(() => {
       if (loading || !auth) return;
 
-      let ws: WebSocket;
+      let stompClient: WebSocket;
 
       const handleInitSocketJS = async () => {
          try {
-            ws = new WebSocket("ws://localhost:8080/ws/"+auth.id);
+            const ws = new SockJS("http://localhost:8080/messages/");
+            const stompClient = Stomp.over(ws);
 
-            setSocket(ws);
+            stompClient.connect({}, () => {
+               stompClient.subscribe("/topic/messages", (m) => {
+                  console.log("received: ", m.body);
+               });
+
+               stompClient.subscribe("/user/queue/private", (m) => {
+                  console.log("received private: ", m.body);
+               });
+            });
+
+            setSocket(stompClient);
          } catch (error) {
             console.log({ message: error });
          }
@@ -58,7 +72,7 @@ const SocketProvider = ({ children }: { children: ReactNode }) => {
       handleInitSocketJS();
 
       return () => {
-         ws.close();
+         stompClient.close();
       };
    }, [loading, auth]);
 

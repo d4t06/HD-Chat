@@ -21,7 +21,9 @@ export default function useMessageActions() {
          setIsFetching(true);
          if (import.meta.env.DEV) await sleep(500);
 
-         const res = await privateRequest.get(`${MESSAGE_URL}?conversationID=${conversation_id}`);
+         const res = await privateRequest.get(
+            `${MESSAGE_URL}?conversationID=${conversation_id}`
+         );
          return res.data.data as Message[];
       } catch (error) {
          console.log(error);
@@ -34,16 +36,20 @@ export default function useMessageActions() {
       try {
          if (!socket) return;
 
-         const res = await privateRequest.post(MESSAGE_URL, message);
-         const newMessage = res.data.data as Message;
+         // const res = await privateRequest.post(MESSAGE_URL, message);
+         // const newMessage = res.data.data as Message;
 
-         dispatch(
-            storingConversation({
-               messages: [newMessage],
-            })
-         );
+         // dispatch(
+         //    storingConversation({
+         //       messages: [newMessage],
+         //    })
+         // );
 
-         socket.send(JSON.stringify(newMessage));
+         // socket.send("/user/2/queue/private", {}, JSON.stringify(newMessage));
+
+         console.log('check socket: ', socket);
+         
+
       } catch (error) {
          console.log({ message: error });
       }

@@ -125,7 +125,7 @@ export default function Sidebar() {
       [searchResult, tempUser]
    );
 
-   console.log("check conversation", conversations, currentConversationInStore);
+   // console.log("check conversation", conversations, currentConversationInStore);
 
    return (
       <>
