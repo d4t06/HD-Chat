@@ -36,20 +36,10 @@ export default function useMessageActions() {
       try {
          if (!socket) return;
 
-         // const res = await privateRequest.post(MESSAGE_URL, message);
-         // const newMessage = res.data.data as Message;
 
-         // dispatch(
-         //    storingConversation({
-         //       messages: [newMessage],
-         //    })
-         // );
-
-         // socket.send("/user/2/queue/private", {}, JSON.stringify(newMessage));
-
+         socket.send("/user/VIETNAMlkjsdkljasdkf/queue/  messages", {}, JSON.stringify({content: "this is test message"}));
          console.log('check socket: ', socket);
-         
-
+      
       } catch (error) {
          console.log({ message: error });
       }

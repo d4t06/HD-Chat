@@ -58,7 +58,8 @@ const SocketProvider = ({ children }: { children: ReactNode }) => {
                   console.log("received: ", m.body);
                });
 
-               stompClient.subscribe("/user/queue/private", (m) => {
+               // must send to /user/{username}/queue destination
+               stompClient.subscribe("/user/queue", (m) => {
                   console.log("received private: ", m.body);
                });
             });
