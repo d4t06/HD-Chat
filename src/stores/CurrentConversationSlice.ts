@@ -4,6 +4,7 @@ type StateType = {
    messageStatus: "" | "loading" | "more-loading" | "successful" | "error";
    currentConversationInStore: Conversation | null;
    messages: Message[];
+   tempImageMessages: MessageSchema[];
    tempUser: User | null;
    page: number;
    size: number;
@@ -13,6 +14,7 @@ type StateType = {
 const initState: StateType = {
    currentConversationInStore: null,
    messages: [],
+   tempImageMessages: [],
    page: 0,
    size: 20,
    messageStatus: "loading",

@@ -32,14 +32,30 @@ export default function useMessageActions() {
       }
    };
 
-   const sendMessage = async (message: MessageSchema) => {
+   const sendMessage = async (
+      message: MessageSchema,
+      { update = true }: { update?: boolean }
+   ) => {
       try {
          if (!socket) return;
 
+         const res = await privateRequest.post(MESSAGE_URL, message);
+         const newMessage = res.data.data as Message;
 
-         socket.send("/user/VIETNAMlkjsdkljasdkf/queue/  messages", {}, JSON.stringify({content: "this is test message"}));
-         console.log('check socket: ', socket);
-      
+         if (update)
+            dispatch(
+               storingConversation({
+                  messages: [newMessage],
+               })
+            );
+
+         socket.send(
+            "/user/VIETNAMlkjsdkljasdkf/queue/  messages",
+            {},
+            JSON.stringify({ content: "this is test message" })
+         );
+
+         return newMessage;
       } catch (error) {
          console.log({ message: error });
       }

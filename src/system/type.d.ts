@@ -3,6 +3,19 @@ type ThemeType = {
    type: "light" | "dark";
 };
 
+type ImageType = {
+   id: number;
+   image_url: string;
+   public_id: string;
+   width: number;
+   height: number;
+   name: string;
+   size: number;
+   link_to: string;
+};
+
+type ImageSchema = Omit<ImageType, "id">;
+
 type User = {
    id: number;
    fullName: string;
@@ -34,6 +47,7 @@ type Message = {
    id: number;
    content: string;
    type: "text" | "image" | "emoji" | "system-log";
+   status: "sending" | "sent" | "received" | "seen";
    from_user_id: number;
    conversation_id: number;
    sent_at: string;

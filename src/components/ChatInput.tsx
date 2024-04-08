@@ -31,11 +31,12 @@ export default function ChatInput() {
          if (auth) {
             const messageSchema: MessageSchema = {
                conversation_id: currentConversationInStore.id,
-               content: message || '&#128075;',
+               content: message,
                from_user_id: auth.id,
                type: "text",
+               status: "sending",
             };
-            sendMessage(messageSchema);
+            sendMessage(messageSchema, {});
          }
       }
 
@@ -43,17 +44,24 @@ export default function ChatInput() {
    };
 
    const classes = {
-      container: "flex h-[60px] items-center p-2 sm:p-4 border-t",
+      container: "flex items-center p-2 sm:p-4 border-t",
       button: "p-[4px]",
       input: "flex-grow h-[36px] ml-[10px] font-[500] text-[#1f1f1f] border-[2px] border-[#ccc] bg-[#f3f3f5] rounded-full px-2 sm:px-4 outline-none",
    };
 
    return (
       <div className={classes.container}>
-         <Button className={classes.button} variant={"push"} size={"clear"} colors="secondary">
-            <PhotoIcon className="w-[22px]" />
-         </Button>
-         <form className="flex-grow flex" action="" onSubmit={handleSendMessage}>
+         <label htmlFor="image-upload">
+            <Button
+               className={classes.button}
+               variant={"push"}
+               size={"clear"}
+               colors="secondary"
+            >
+               <PhotoIcon className="w-[22px]" />
+            </Button>
+         </label>
+         <div className="flex-grow flex">
             <input
                className={classes.input}
                placeholder="Message..."
@@ -67,11 +75,15 @@ export default function ChatInput() {
                variant={"push"}
                size={"clear"}
                colors="secondary"
-               type="submit"
+               onClick={handleSendMessage}
             >
-               {message ? <PaperAirplaneIcon className="w-[20px]" /> : <span>&#128075;</span>}
+               {message ? (
+                  <PaperAirplaneIcon className="w-[20px]" />
+               ) : (
+                  <span>&#128075;</span>
+               )}
             </Button>
-         </form>
+         </div>
       </div>
    );
 }

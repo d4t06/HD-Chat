@@ -17,13 +17,10 @@ export default function ChatScreen() {
    // const showAvatar = useRef(false);
 
    const classes = {
-      container: "h-screen overflow-hidden relative",
+      container: "h-screen overflow-hidden relative flex flex-col",
       button: "p-[4px]",
-      chatBarContainer: "absolute bottom-0 left-0 right-0 z-10 bg-white",
-      messagesWrapper:
-         "relative h-[calc(100vh-60px-60px)] after:content-[''] after:absolute after:left-0 after:right-0 after:top-0 after:h-[100%]  after:pointer-events-none",
       messageListContainer:
-         "p-4 h-full overflow-auto flex flex-col items-start space-y-[2px]",
+         "flex-grow-1 p-2 sm:p-4 h-full overflow-auto flex flex-col items-start space-y-[2px]",
    };
 
    // hooks
@@ -38,7 +35,7 @@ export default function ChatScreen() {
    const renderMessageList = useMemo(() => {
       if (!auth) return;
 
-      return <MessageList auth={auth} messages={messages} />;
+      return <MessageList auth={auth} />;
    }, [messages.length]);
 
    // console.log("chat screen render");
@@ -89,27 +86,23 @@ export default function ChatScreen() {
          </div>
 
          {/* main content */}
-         <div className={classes.messagesWrapper}>
-            <div className={classes.messageListContainer}>
-               {messageStatus === "loading" && (
-                  <span>
-                     <ArrowPathIcon className="w-[24px] animate-spin" />
-                  </span>
-               )}
+         <div className={classes.messageListContainer}>
+            {messageStatus === "loading" && (
+               <span>
+                  <ArrowPathIcon className="w-[24px] animate-spin" />
+               </span>
+            )}
 
-               {messageStatus !== "loading" && (
-                  <>
-                     {messageStatus === "successful" && renderMessageList}
-                     {messageStatus === "error" && <p>Some thing went wrong</p>}
-                  </>
-               )}
-            </div>
+            {messageStatus !== "loading" && (
+               <>
+                  {messageStatus === "successful" && renderMessageList}
+                  {messageStatus === "error" && <p>Some thing went wrong</p>}
+               </>
+            )}
          </div>
 
          {/* chat input */}
-         <div className={classes.chatBarContainer}>
-            <ChatInput />
-         </div>
+         <ChatInput />
       </div>
    );
 }

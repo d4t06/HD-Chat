@@ -1,16 +1,17 @@
 import { AuthType } from "@/stores/AuthContext";
-import MessageItem from "./MessageItem";
+import MessageItem from "./Message/MessageItem";
 import { useSelector } from "react-redux";
 import { selectCurrentConversation } from "@/stores/CurrentConversationSlice";
 import { useRef } from "react";
 
 type Props = {
-   messages: Message[];
    auth: AuthType;
 };
 
-export default function MessageList({ messages, auth }: Props) {
-   const { currentConversationInStore } = useSelector(selectCurrentConversation);
+export default function MessageList({ auth }: Props) {
+   const { currentConversationInStore, messages } = useSelector(
+      selectCurrentConversation
+   );
 
    const from_user_id = useRef<number | null>(null);
    let showAvatar = false;
