@@ -1,28 +1,21 @@
-import { generateId } from "@/utils/appHelper";
-import { ChangeEvent } from "react";
+import { generateId, sleep } from "@/utils/appHelper";
+import { ChangeEvent, useRef } from "react";
 import usePrivateRequest from "./usePrivateRequest";
-import { nanoid } from "@reduxjs/toolkit";
 import useMessageActions from "./useMessageActions";
 import { useDispatch, useSelector } from "react-redux";
-import {
-   selectCurrentConversation,
-   storingConversation,
-} from "@/stores/CurrentConversationSlice";
+import { selectCurrentConversation, storingConversation } from "@/stores/CurrentConversationSlice";
 import { useAuth } from "@/stores/AuthContext";
 
-const IMAGE_URL = "/image-management/images";
+const IMAGE_URL = "/images";
 
 export default function useUploadImage() {
    // hooks
    const dispatch = useDispatch();
 
-   const { currentConversationInStore, tempUser, tempImageMessages } = useSelector(
-      selectCurrentConversation
-   );
    const { auth } = useAuth();
    const { sendMessage } = useMessageActions();
-
    const privateRequest = usePrivateRequest();
+   const { currentConversationInStore, tempImages } = useSelector(selectCurrentConversation);
 
    const imageFactory = (data: Partial<ImageSchema>) => {
       const newImage: ImageSchema = {
@@ -52,102 +45,90 @@ export default function useUploadImage() {
       return newMessage;
    };
 
-   const handleInputChange = () => {};
+   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+      if (!currentConversationInStore || !auth) return;
 
-   const handleSendImage = async (e: ChangeEvent<HTMLInputElement>) => {
+      const inputEle = e.target as HTMLInputElement & { files: FileList };
+      const fileLists = inputEle.files;
+
+      const processImageList: ImageSchema[] = [...tempImages];
+
+      for (const file of fileLists) {
+         const imageObject = imageFactory({
+            name: generateId(file.name),
+            image_url: URL.createObjectURL(file),
+            size: file.size,
+         });
+
+         processImageList.push(imageObject);
+      }
+
+      dispatch(storingConversation({ tempImages: processImageList }));
+   };
+
+   const handleSendImage = async (inputEle: HTMLInputElement) => {
       try {
-         if (!currentConversationInStore)
-            throw new Error("currentConversationInStore not found");
-         if (!auth) throw new Error("Auth not found");
+         if (!currentConversationInStore || !auth) return;
 
-         const inputEle = e.target as HTMLInputElement & { files: FileList };
          const fileLists = inputEle.files;
+         if (!fileLists) return;
 
-         // init tempImage
-         const processImageList: ImageSchema[] = [];
-         const fileNeedToUploadIndexes: number[] = [];
-         const tempMessages: MessageSchema[] = [];
+         const tempMessageList: MessageSchema[] = [];
 
-         const checkDuplicateImage = (ob: ImageSchema) => {
-            return processImageList.some(
-               (image) => image.name === ob.name && image.size == ob.size
-            );
-         };
-
-         let i = 0;
-         for (const file of fileLists) {
-            const imageObject = imageFactory({
-               name: generateId(file.name),
-               image_url: URL.createObjectURL(file),
-               size: file.size,
-            });
-
-            if (checkDuplicateImage(imageObject)) {
-               URL.revokeObjectURL(imageObject.image_url);
-
-               i++;
-               continue;
-            }
-
-            processImageList.push(imageObject);
+         for (const imageSchema of tempImages) {
             const tempImageMessage = messageFactory({
                conversation_id: currentConversationInStore.id,
-               content: imageObject.image_url,
+               content: imageSchema.image_url,
                from_user_id: auth.id,
                status: "sending",
                type: "image",
             });
-
-            tempImageMessages.push(tempImageMessage);
-            fileNeedToUploadIndexes.push(i);
-
-            // assign
-            Object.assign(file, {
-               message_index: tempImageMessages.length - 1,
-            });
-
-            i++;
+            tempMessageList.push(tempImageMessage);
          }
 
-         // setTempImages(processImageList);
+         dispatch(storingConversation({ tempImages: [], tempImageMessages: tempMessageList }));
 
-         for (const val of fileNeedToUploadIndexes.reverse()) {
-            const file = fileLists[val] as File & { message_index: number };
+         for (let i = 0; i <= fileLists.length - 1; i++) {
+            const file = fileLists[i];
 
             const formData = new FormData();
             formData.append("image", file);
 
             const controller = new AbortController();
+            if (import.meta.env.DEV) await sleep(1000);
 
             const res = await privateRequest.post(IMAGE_URL, formData, {
                headers: { "Content-Type": "multipart/form-data" },
                signal: controller.signal,
             });
 
-            const newMessageSchema = tempMessages.shift();
-            if (!newMessageSchema) return;
-
             const newImage = res.data.data as ImageType;
 
-            Object.assign(newMessageSchema, {
-               content: newImage.image_url,
-               status: "seen",
-            } as Partial<MessageSchema>);
+            const newMessageSchema = { ...tempMessageList[0] };
+            if (!newMessageSchema) return;
+
+            tempMessageList.splice(0, 1);
+
+            newMessageSchema.status = "seen";
+            newMessageSchema.content = newImage.image_url;
 
             const newMessage = await sendMessage(newMessageSchema, { update: false });
             if (!newMessage) throw new Error("error when send message");
 
             dispatch(
                storingConversation({
-                  tempImageMessages: tempImageMessages,
                   messages: [newMessage],
+                  tempImageMessages: tempMessageList,
+                  replace: false,
                })
             );
+
+            console.log("upload file finish");
          }
       } catch (error) {
          console.log(error);
       }
    };
 
-   return { handleInputChange };
+   return { handleInputChange, handleSendImage };
 }

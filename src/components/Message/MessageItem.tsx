@@ -2,6 +2,7 @@ import { Ref, forwardRef, useMemo } from "react";
 import AvatarPlaceholder from "../Avatar";
 import { Bars3Icon, FaceSmileIcon } from "@heroicons/react/24/outline";
 import MessageContent from "./MessageContent";
+import ImageMessage from "./ImageMessage";
 // import AvatarPlaceholder from "./Avatar";
 
 type OtherMessage = {
@@ -11,16 +12,23 @@ type OtherMessage = {
    showAvatar: boolean;
 };
 
+type TempImageMessage = {
+   type: "temp-image";
+   message: MessageSchema;
+};
+
 type SelfMessage = {
    type: "self";
    message: Message;
 };
 
-function MessageItem(props: OtherMessage | SelfMessage, ref: Ref<HTMLDivElement>) {
+function MessageItem(
+   props: OtherMessage | SelfMessage | TempImageMessage,
+   ref: Ref<HTMLDivElement>
+) {
    const classes = {
       messageContainer: "flex w-full group last:pb-[30px]",
-      textContainer:
-         "bg-[#f3f3f5] px-[12px] py-[6px] rounded-[8px] break-words overflow-hidden",
+      textContainer: "bg-[#f3f3f5] px-[12px] py-[6px] rounded-[8px] break-words overflow-hidden",
       button: "p-[4px] rounded-[99px] hover:bg-[#f3f3f5] ",
    };
 
@@ -66,6 +74,8 @@ function MessageItem(props: OtherMessage | SelfMessage, ref: Ref<HTMLDivElement>
                   <MessageContent self={true} message={props.message} />
                </div>
             );
+         case "temp-image":
+            return <ImageMessage type="temp" message={props.message} />;
       }
    }, []);
 
@@ -81,10 +91,9 @@ function MessageItem(props: OtherMessage | SelfMessage, ref: Ref<HTMLDivElement>
                </div>
             );
          case "self":
+         case "temp-image":
             return (
-               <div
-                  className={`${classes.messageContainer} flex-row-reverse justify-start`}
-               >
+               <div className={`${classes.messageContainer} flex-row-reverse justify-start`}>
                   <div className="max-w-[600px]">{messageContent}</div>
 
                   {messageCta}

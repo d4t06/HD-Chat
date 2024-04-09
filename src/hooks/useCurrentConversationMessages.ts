@@ -1,19 +1,15 @@
 import { useEffect } from "react";
 import useMessageActions from "./useMessageActions";
 import { useDispatch, useSelector } from "react-redux";
-import {
-   selectCurrentConversation,
-   storingConversation,
-} from "@/stores/CurrentConversationSlice";
+import { selectCurrentConversation, storingConversation } from "@/stores/CurrentConversationSlice";
 import { useConversation } from "@/stores/ConversationContext";
 
 export default function useCurrentConversationMessage() {
    // hooks
    const dispatch = useDispatch();
    const { status: getConversationStatus } = useConversation();
-   const { currentConversationInStore, tempUser } = useSelector(
-      selectCurrentConversation
-   );
+   const { currentConversationInStore, tempUser, messageStatus } =
+      useSelector(selectCurrentConversation);
    const { getCurrentConversationMessages } = useMessageActions();
 
    const handleInitConversation = async () => {
@@ -21,12 +17,11 @@ export default function useCurrentConversationMessage() {
          // if found conversation
          if (!currentConversationInStore) return;
 
-         const messages = await getCurrentConversationMessages(
-            currentConversationInStore.id
-         );
+         const messages = await getCurrentConversationMessages(currentConversationInStore.id);
+
          dispatch(
             storingConversation({
-               messages,
+               messages: messages || [],
                messageStatus: "successful",
                replace: true,
             })
@@ -43,8 +38,9 @@ export default function useCurrentConversationMessage() {
 
    // problem after send new message to new user auto set status = loading
    useEffect(() => {
-      if (getConversationStatus === "loading" || getConversationStatus === "error")
-         return;
+      if (getConversationStatus === "loading" || getConversationStatus === "error") return;
+
+      if (messageStatus === "successful") return;
 
       if (!currentConversationInStore) {
          dispatch(

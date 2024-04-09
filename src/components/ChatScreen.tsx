@@ -28,15 +28,8 @@ export default function ChatScreen() {
 
    useCurrentConversationMessage();
 
-   const { messageStatus, currentConversationInStore, tempUser, messages } = useSelector(
-      selectCurrentConversation
-   );
-
-   const renderMessageList = useMemo(() => {
-      if (!auth) return;
-
-      return <MessageList auth={auth} />;
-   }, [messages.length]);
+   const { messageStatus, currentConversationInStore, tempUser, messages } =
+      useSelector(selectCurrentConversation);
 
    // console.log("chat screen render");
 
@@ -95,7 +88,7 @@ export default function ChatScreen() {
 
             {messageStatus !== "loading" && (
                <>
-                  {messageStatus === "successful" && renderMessageList}
+                  {messageStatus === "successful" && <MessageList auth={auth} />}
                   {messageStatus === "error" && <p>Some thing went wrong</p>}
                </>
             )}

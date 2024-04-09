@@ -73,14 +73,12 @@ const SocketProvider = ({ children }: { children: ReactNode }) => {
       handleInitSocketJS();
 
       return () => {
-         stompClient.close();
+         if (stompClient) stompClient.close();
       };
    }, [loading, auth]);
 
    return (
-      <SocketContext.Provider
-         value={{ state: { socket, onlineUsers }, setOnlineUsers, setSocket }}
-      >
+      <SocketContext.Provider value={{ state: { socket, onlineUsers }, setOnlineUsers, setSocket }}>
          {children}
       </SocketContext.Provider>
    );

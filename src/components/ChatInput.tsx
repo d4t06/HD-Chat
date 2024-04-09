@@ -1,89 +1,147 @@
-import { PaperAirplaneIcon, PhotoIcon } from "@heroicons/react/24/outline";
+import { PaperAirplaneIcon, PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Button from "./ui/Button";
-import { FormEvent, useState } from "react";
+import { ElementRef, FormEvent, ReactNode, useMemo, useRef, useState } from "react";
 import { useSocket } from "@/stores/SocketContext";
 import { useSelector } from "react-redux";
 import { selectCurrentConversation } from "@/stores/CurrentConversationSlice";
 import useMessageActions from "@/hooks/useMessageActions";
 import useSendMessageToNewConversation from "@/hooks/useNewConversation";
 import { useAuth } from "@/stores/AuthContext";
+import useUploadImage from "@/hooks/useUploadImage";
+import PreviewImageList from "./PreviewImagesList";
+// import useMemberActions from "@/hooks/useMemberActions";
 
 export default function ChatInput() {
    const [message, setMessage] = useState("");
+   const imageInputRef = useRef<ElementRef<"input">>(null);
 
    //hooks
    const { auth } = useAuth();
-   const { currentConversationInStore } = useSelector(selectCurrentConversation);
+   const { currentConversationInStore, tempImages } = useSelector(selectCurrentConversation);
    const { socket } = useSocket();
    const { sendMessage } = useMessageActions();
+   const { handleInputChange, handleSendImage } = useUploadImage();
 
    const { sendMessageToNewConversation } = useSendMessageToNewConversation();
 
    const clear = () => setMessage("");
 
-   const handleSendMessage = async (e: FormEvent) => {
-      e.preventDefault();
-      if (!socket) return;
+   // const handleTriggleSendImage = () => {
+   //    const inputEle = e.target as HTMLInputElement & { files: FileList };
+   //    const fileLists = inputEle.files;
+   // };
 
-      if (!currentConversationInStore) {
-         sendMessageToNewConversation(message);
-      } else {
-         if (auth) {
-            const messageSchema: MessageSchema = {
-               conversation_id: currentConversationInStore.id,
-               content: message,
-               from_user_id: auth.id,
-               type: "text",
-               status: "sending",
-            };
-            sendMessage(messageSchema, {});
+   const handleSendMessage = async (type: "image" | "message" | "icon") => {
+      try {
+         console.log("check type", type);
+
+         if (!socket || !auth) return;
+         if (!currentConversationInStore) {
+            return sendMessageToNewConversation(message);
          }
-      }
 
-      clear();
+         switch (type) {
+            case "image":
+               const inputEle = imageInputRef.current;
+               if (!inputEle) return;
+
+               await handleSendImage(imageInputRef.current);
+               break;
+            case "message":
+               const messageSchema: MessageSchema = {
+                  conversation_id: currentConversationInStore.id,
+                  content: message,
+                  from_user_id: auth.id,
+                  type: "text",
+                  status: "sending",
+               };
+               return sendMessage(messageSchema, {});
+            case "icon":
+         }
+      } catch (error) {
+         console.log({ message: error });
+      } finally {
+         console.log("run finally");
+
+         clear();
+      }
    };
 
+   const SendButton = ({ children, onClick }: { children: ReactNode; onClick: () => void }) => {
+      return (
+         <Button
+            className={`h-[34px] w-[34px] ml-[10px]`}
+            variant={"push"}
+            size={"clear"}
+            colors="secondary"
+            onClick={onClick}
+         >
+            {children}
+         </Button>
+      );
+   };
+
+   const renderSendButton = useMemo(() => {
+      if (tempImages.length)
+         return (
+            <SendButton onClick={() => handleSendMessage("image")}>
+               <PaperAirplaneIcon className="w-[20px]" />
+            </SendButton>
+         );
+
+      if (message)
+         return (
+            <SendButton onClick={() => handleSendMessage("message")}>
+               <PaperAirplaneIcon className="w-[20px]" />
+            </SendButton>
+         );
+
+      return (
+         <SendButton onClick={() => handleSendMessage("icon")}>
+            <span>&#128075;</span>
+         </SendButton>
+      );
+   }, [message, tempImages]);
+
    const classes = {
-      container: "flex items-center p-2 sm:p-4 border-t",
+      container: "flex p-2 sm:p-4 border-t",
       button: "p-[4px]",
-      input: "flex-grow h-[36px] ml-[10px] font-[500] text-[#1f1f1f] border-[2px] border-[#ccc] bg-[#f3f3f5] rounded-full px-2 sm:px-4 outline-none",
+      inputContainer:
+         "bg-[#f3f3f5] flex-grow ml-[10px] border-[2px] border-[#ccc] rounded-[16px] px-3",
+      input: " h-[32px] bg-transparent w-full font-[500] text-[#1f1f1f]  outline-none",
    };
 
    return (
-      <div className={classes.container}>
-         <label htmlFor="image-upload">
-            <Button
-               className={classes.button}
-               variant={"push"}
-               size={"clear"}
-               colors="secondary"
-            >
+      <div className={`${classes.container} ${tempImages.length ? "items-end" : "items-center"}`}>
+         <input
+            ref={imageInputRef}
+            onChange={handleInputChange}
+            type="file"
+            multiple
+            accept="image/*"
+            id="image-choose"
+            className="hidden"
+         />
+         <Button variant={"push"} size={"clear"} colors="secondary">
+            <label className="flex cursor-pointer p-[4px]" htmlFor="image-choose">
                <PhotoIcon className="w-[22px]" />
-            </Button>
-         </label>
+            </label>
+         </Button>
          <div className="flex-grow flex">
-            <input
-               className={classes.input}
-               placeholder="Message..."
-               type="text"
-               onChange={(e) => setMessage(e.target.value)}
-               value={message}
-            />
+            <div className={classes.inputContainer}>
+               <PreviewImageList />
 
-            <Button
-               className={`h-[34px] w-[34px] ml-[10px]`}
-               variant={"push"}
-               size={"clear"}
-               colors="secondary"
-               onClick={handleSendMessage}
-            >
-               {message ? (
-                  <PaperAirplaneIcon className="w-[20px]" />
-               ) : (
-                  <span>&#128075;</span>
-               )}
-            </Button>
+               <input
+                  className={classes.input}
+                  placeholder="Message..."
+                  type="text"
+                  onChange={(e) => setMessage(e.target.value)}
+                  value={message}
+               />
+            </div>
          </div>
+
+         {renderSendButton}
       </div>
    );
 }

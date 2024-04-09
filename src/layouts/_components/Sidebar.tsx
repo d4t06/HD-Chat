@@ -8,10 +8,7 @@ import { useConversation } from "@/stores/ConversationContext";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/Popover";
 import AccountMenu from "@/components/AccountMenu";
 import { useDispatch, useSelector } from "react-redux";
-import {
-   selectCurrentConversation,
-   storingConversation,
-} from "@/stores/CurrentConversationSlice";
+import { selectCurrentConversation, storingConversation } from "@/stores/CurrentConversationSlice";
 import SidebarConversationItem from "@/components/SidebarConversationItem";
 
 export default function Sidebar() {
@@ -21,9 +18,7 @@ export default function Sidebar() {
    const dispatch = useDispatch();
    const { auth } = useAuth();
    const { conversations, status } = useConversation();
-   const { currentConversationInStore, tempUser } = useSelector(
-      selectCurrentConversation
-   );
+   const { currentConversationInStore, tempUser } = useSelector(selectCurrentConversation);
 
    type Default = {
       type: "default";
@@ -42,6 +37,7 @@ export default function Sidebar() {
                storingConversation({
                   currentConversationInStore: props.conversation,
                   tempUser: null,
+                  messageStatus: "loading",
                })
             );
 
@@ -89,9 +85,7 @@ export default function Sidebar() {
             return (
                <SidebarConversationItem
                   cb={() =>
-                     !isActive
-                        ? handleActiveConversation({ type: "default", conversation: c })
-                        : {}
+                     !isActive ? handleActiveConversation({ type: "default", conversation: c }) : {}
                   }
                   auth={auth}
                   key={index}
@@ -137,11 +131,7 @@ export default function Sidebar() {
                   <Popover placement="bottom-start">
                      <PopoverTrigger>
                         {auth && (
-                           <AccountItem
-                              active={true}
-                              type="default"
-                              fullName={auth.fullName}
-                           />
+                           <AccountItem active={true} type="default" fullName={auth.fullName} />
                         )}
                      </PopoverTrigger>
 

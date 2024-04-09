@@ -5,21 +5,21 @@ type StateType = {
    currentConversationInStore: Conversation | null;
    messages: Message[];
    tempImageMessages: MessageSchema[];
+   tempImages: ImageSchema[];
    tempUser: User | null;
    page: number;
    size: number;
-   isNewConversation: boolean;
 };
 
 const initState: StateType = {
    currentConversationInStore: null,
    messages: [],
    tempImageMessages: [],
+   tempImages: [],
    page: 0,
    size: 20,
-   messageStatus: "loading",
-   isNewConversation: false,
    tempUser: null,
+   messageStatus: "loading",
 };
 
 type PayloadType = Partial<StateType> & {
@@ -35,12 +35,22 @@ const currentConversationSlice = createSlice({
 
          const { replace = false, ...payload } = action.payload;
 
-         if (replace) return Object.assign(state, payload);
+         state.messageStatus = payload.messageStatus || state.messageStatus;
+         state.currentConversationInStore =
+            payload.currentConversationInStore || state.currentConversationInStore;
+         state.page = payload.page || state.page;
+         state.size = payload.size || state.size;
+         state.tempImageMessages = payload.tempImageMessages
+            ? [...payload.tempImageMessages]
+            : state.tempImageMessages;
+         state.tempUser = payload.tempUser || state.tempUser;
+         state.tempImages = payload.tempImages ? [...payload.tempImages] : state.tempImages;
 
-         return Object.assign(state, {
-            ...payload,
-            messages: [...state.messages, ...(payload.messages || [])],
-         });
+         if (replace) {
+            state.messages = payload.messages ? [...payload.messages] : [];
+         } else {
+            state.messages = [...state.messages, ...(payload.messages || [])];
+         }
       },
       reset: (state, _action: PayloadAction<undefined>) => {
          return Object.assign(state, initState);
