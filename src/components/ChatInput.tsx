@@ -1,6 +1,6 @@
 import { PaperAirplaneIcon, PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Button from "./ui/Button";
-import { ElementRef, FormEvent, ReactNode, useMemo, useRef, useState } from "react";
+import { ElementRef, FormEvent, KeyboardEvent, ReactNode, useMemo, useRef, useState } from "react";
 import { useSocket } from "@/stores/SocketContext";
 import { useSelector } from "react-redux";
 import { selectCurrentConversation } from "@/stores/CurrentConversationSlice";
@@ -31,7 +31,7 @@ export default function ChatInput() {
    //    const fileLists = inputEle.files;
    // };
 
-   const handleSendMessage = async (type: "image" | "message" | "icon") => {
+   const handleSendMessage = async (type: "image" | "text" | "icon") => {
       try {
          console.log("check type", type);
 
@@ -47,7 +47,9 @@ export default function ChatInput() {
 
                await handleSendImage(imageInputRef.current);
                break;
-            case "message":
+            case "text":
+            if (!message) return;
+
                const messageSchema: MessageSchema = {
                   conversation_id: currentConversationInStore.id,
                   content: message,
@@ -65,6 +67,10 @@ export default function ChatInput() {
 
          clear();
       }
+   };
+
+   const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === "Enter") handleSendMessage("text");
    };
 
    const SendButton = ({ children, onClick }: { children: ReactNode; onClick: () => void }) => {
@@ -91,7 +97,7 @@ export default function ChatInput() {
 
       if (message)
          return (
-            <SendButton onClick={() => handleSendMessage("message")}>
+            <SendButton onClick={() => handleSendMessage("text")}>
                <PaperAirplaneIcon className="w-[20px]" />
             </SendButton>
          );
@@ -135,8 +141,10 @@ export default function ChatInput() {
                   className={classes.input}
                   placeholder="Message..."
                   type="text"
+                  disabled={!!tempImages.length}
                   onChange={(e) => setMessage(e.target.value)}
                   value={message}
+                  onKeyDown={handleKeyDown}
                />
             </div>
          </div>

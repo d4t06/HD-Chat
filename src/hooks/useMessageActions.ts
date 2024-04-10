@@ -21,9 +21,7 @@ export default function useMessageActions() {
          setIsFetching(true);
          if (import.meta.env.DEV) await sleep(500);
 
-         const res = await privateRequest.get(
-            `${MESSAGE_URL}?conversationID=${conversation_id}`
-         );
+         const res = await privateRequest.get(`${MESSAGE_URL}?conversationID=${conversation_id}`);
          return res.data.data as Message[];
       } catch (error) {
          console.log(error);
@@ -32,28 +30,22 @@ export default function useMessageActions() {
       }
    };
 
-   const sendMessage = async (
-      message: MessageSchema,
-      { update = true }: { update?: boolean }
-   ) => {
+   const sendMessage = async (message: MessageSchema, { update = true }: { update?: boolean }) => {
       try {
          if (!socket) return;
 
          const res = await privateRequest.post(MESSAGE_URL, message);
          const newMessage = res.data.data as Message;
 
-         if (update)
+         if (update) {
             dispatch(
                storingConversation({
                   messages: [newMessage],
                })
             );
+         }
 
-         socket.send(
-            "/user/VIETNAMlkjsdkljasdkf/queue/  messages",
-            {},
-            JSON.stringify({ content: "this is test message" })
-         );
+         socket.send("/app/messages", {}, JSON.stringify(message));
 
          return newMessage;
       } catch (error) {

@@ -53,16 +53,7 @@ const SocketProvider = ({ children }: { children: ReactNode }) => {
             const ws = new SockJS("http://localhost:8080/messages/");
             const stompClient = Stomp.over(ws);
 
-            stompClient.connect({}, () => {
-               stompClient.subscribe("/topic/messages", (m) => {
-                  console.log("received: ", m.body);
-               });
-
-               // must send to /user/{username}/queue destination
-               stompClient.subscribe("/user/queue", (m) => {
-                  console.log("received private: ", m.body);
-               });
-            });
+            // stompClient.connect({}, () => {});
 
             setSocket(stompClient);
          } catch (error) {

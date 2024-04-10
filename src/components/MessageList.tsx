@@ -9,6 +9,7 @@ type Props = {
 };
 
 export default function MessageList({ auth }: Props) {
+
    const { currentConversationInStore, messages, tempImageMessages } =
       useSelector(selectCurrentConversation);
 
@@ -34,7 +35,7 @@ export default function MessageList({ auth }: Props) {
             from_user_id.current = m.from_user_id;
 
             const isSelf = m.from_user_id === auth.id;
-            if (isSelf) return <MessageItem key={index} type="self" message={m} />;
+            if (isSelf) return <MessageItem className={showAvatar ? 'pt-[20px]' : ""} key={index} type="self" message={m} />;
 
             const member = currentConversationInStore?.members.find(
                (mem) => mem.user_id === m.from_user_id
@@ -49,6 +50,7 @@ export default function MessageList({ auth }: Props) {
                   user={member.user}
                   message={m}
                   showAvatar={showAvatar}
+                  className={showAvatar ? 'pt-[20px]' : ""}
                />
             );
          }),

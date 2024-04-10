@@ -23,7 +23,7 @@ type SelfMessage = {
 };
 
 function MessageItem(
-   props: OtherMessage | SelfMessage | TempImageMessage,
+   props: (OtherMessage | SelfMessage | TempImageMessage) & { className?: string },
    ref: Ref<HTMLDivElement>
 ) {
    const classes = {
@@ -83,7 +83,7 @@ function MessageItem(
       switch (props.type) {
          case "other":
             return (
-               <div className={classes.messageContainer}>
+               <div className={`${classes.messageContainer} ${props.className || ""}`}>
                   <div className="max-w-[600px]">{messageContent}</div>
 
                   {/* cta */}
@@ -93,7 +93,10 @@ function MessageItem(
          case "self":
          case "temp-image":
             return (
-               <div className={`${classes.messageContainer} flex-row-reverse justify-start`}>
+               <div
+                  className={`${classes.messageContainer} flex-row-reverse justify-start  ${
+                     props.className || ''}`}
+               >
                   <div className="max-w-[600px]">{messageContent}</div>
 
                   {messageCta}

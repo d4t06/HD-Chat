@@ -44,7 +44,7 @@ export default function PreviewImageList() {
                </>
 
                <div className="w-1/6 px-[8px]">
-                  <Empty>
+                  <Empty className="bg-white overflow-hidden hover:opacity-80">
                      <label
                         htmlFor="image-choose"
                         className="cursor-pointer w-full h-full flex items-center justify-center"
