@@ -30,14 +30,15 @@ const usePrivateRequest = () => {
             // Do something with response error
             const prevRequest = err?.config;
 
-            if (err?.response?.status === 401) {
-               if (!prevRequest?.sent) {
-                  prevRequest["sent"] = true;
-                  const newToken = await refresh();
-                  prevRequest.headers["Authorization"] = `bearer ${newToken}`;
-               }
+            if (!prevRequest["sent"]) {
+               prevRequest["sent"] = true;
 
-               return privateRequest(prevRequest);
+               if (err?.response?.status === 401) {
+                  const newToken = await refresh();
+                  prevRequest.headers["Authorization"] = `Bearer ${newToken}`;
+
+                  return privateRequest(prevRequest);
+               }
             }
             return Promise.reject(err);
          }

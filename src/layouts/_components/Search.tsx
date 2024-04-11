@@ -7,12 +7,14 @@ import {
 } from "@heroicons/react/24/outline";
 
 type Props = {
-   setResult: Dispatch<SetStateAction<User[]>>;
+   setResult: Dispatch<SetStateAction<User | undefined>>;
+   setIsSearch: Dispatch<SetStateAction<boolean>>;
 };
 
-export default function Search({ setResult }: Props) {
+export default function Search({ setResult, setIsSearch }: Props) {
    const { inputAttrs, isFetching, phoneNumber, handleClear } = useSearchUser({
       setResult,
+      setIsSearch
    });
 
    const classes = {

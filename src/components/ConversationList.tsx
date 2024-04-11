@@ -5,18 +5,20 @@ import SidebarConversationItem from "./SidebarConversationItem";
 
 type Props = {
    conversations: Conversation[];
-   cb: () => void;
+   cb: (c: Conversation) => void;
    auth: AuthType;
 };
 export default function ConversationList({ cb, auth, conversations }: Props) {
    const { currentConversationInStore } = useSelector(selectCurrentConversation);
 
-   return conversations.map((c, index) => {
+   const mapContent = conversations.map((c, index) => {
       const isActive = currentConversationInStore?.id == c.id;
+
+      const callback = () => cb(c);
 
       return (
          <SidebarConversationItem
-            cb={cb}
+            cb={callback}
             auth={auth}
             key={index}
             active={isActive}
@@ -24,4 +26,11 @@ export default function ConversationList({ cb, auth, conversations }: Props) {
          />
       );
    });
+
+   return (
+      <div className="">
+         <h5 className="pl-4 hidden sm:block">Your conversations</h5>
+         {mapContent}
+      </div>
+   );
 }

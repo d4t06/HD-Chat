@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import Button from "../../components/ui/Button";
-import { PlusIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon } from "@heroicons/react/24/outline";
 import AccountItem from "../../components/AccountItem";
 import { useAuth } from "@/stores/AuthContext";
 import Search from "./Search";
@@ -9,10 +9,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/Popover
 import AccountMenu from "@/components/AccountMenu";
 import { useDispatch, useSelector } from "react-redux";
 import { selectCurrentConversation, storingConversation } from "@/stores/CurrentConversationSlice";
-import SidebarConversationItem from "@/components/SidebarConversationItem";
+import ConversationList from "@/components/ConversationList";
+import SearchNotFound from "@/components/SearchNotFound";
 
 export default function Sidebar() {
-   const [searchResult, setResult] = useState<User[]>([]);
+   const [searchResult, setResult] = useState<User>();
+   const [isSearch, setIsSearch] = useState(false);
 
    // hooks
    const dispatch = useDispatch();
@@ -33,6 +35,7 @@ export default function Sidebar() {
    const handleActiveConversation = (props: Default | NewConversation) => {
       switch (props.type) {
          case "default":
+            if (currentConversationInStore?.id === props.conversation.id) return;
             dispatch(
                storingConversation({
                   currentConversationInStore: props.conversation,
@@ -43,6 +46,7 @@ export default function Sidebar() {
 
             break;
          case "new":
+            if (tempUser?.id === props.user.id) return;
             dispatch(
                storingConversation({
                   currentConversationInStore: null,
@@ -65,6 +69,8 @@ export default function Sidebar() {
       conversationItem: "hover:bg-[#f3f3f5] p-2 sm:px-4 w-full",
    };
 
+   console.log("check is searhc", isSearch);
+
    const conversationSkeleton = useMemo(
       () =>
          [...Array(5).keys()].map((key) => (
@@ -78,48 +84,65 @@ export default function Sidebar() {
    const renderConversations = useMemo(() => {
       if (!auth) return;
 
-      if (!!conversations.length && !searchResult.length)
-         return conversations.map((c, index) => {
-            const isActive = currentConversationInStore?.id == c.id;
-
-            return (
-               <SidebarConversationItem
-                  cb={() =>
-                     !isActive ? handleActiveConversation({ type: "default", conversation: c }) : {}
-                  }
-                  auth={auth}
-                  key={index}
-                  active={isActive}
-                  conversation={c}
-               />
+      if (isSearch) {
+         if (searchResult) {
+            const existingConversation = conversations.find((c) =>
+               c.members.find((m) => m.user_id === searchResult.id)
             );
-         });
-   }, [conversations, currentConversationInStore, searchResult]);
 
-   const renderSearchResult = useMemo(
-      () =>
-         !!searchResult.length &&
-         searchResult.map((u, index) => {
-            const isActive = tempUser?.id === u.id;
+            if (existingConversation)
+               return (
+                  <ConversationList
+                     cb={() =>
+                        handleActiveConversation({
+                           type: "default",
+                           conversation: existingConversation,
+                        })
+                     }
+                     conversations={[existingConversation]}
+                     auth={auth}
+                  />
+               );
 
+            const isSelf = searchResult.id === auth?.id;
+
+            if (isSelf) {
+               return (
+                  <div className={`${classes.conversationItem}`}>
+                     <AccountItem
+                        type="default"
+                        fullName={`${searchResult.fullName}`}
+                        desc="Your account"
+                     />
+                  </div>
+               );
+            }
+
+            const isActive = tempUser ? tempUser.id == searchResult.id : false;
             return (
                <div
-                  key={index}
-                  onClick={() =>
-                     !isActive ? handleActiveConversation({ type: "new", user: u }) : {}
-                  }
+                  onClick={() => handleActiveConversation({ type: "new", user: searchResult })}
                   className={`${classes.conversationItem} ${
                      isActive ? classes.activeConversation : ""
                   }`}
                >
-                  <AccountItem type="default" fullName={u.fullName} />
+                  <AccountItem type="default" fullName={searchResult.fullName} />
                </div>
             );
-         }),
-      [searchResult, tempUser]
-   );
+         }
 
-   // console.log("check conversation", conversations, currentConversationInStore);
+         return <SearchNotFound />
+      }
+
+      if (!!conversations.length)
+         return (
+            <ConversationList
+               auth={auth}
+               conversations={conversations}
+               cb={(c) => handleActiveConversation({ type: "default", conversation: c })}
+            />
+         );
+   }, [conversations, currentConversationInStore, searchResult, isSearch]);
 
    return (
       <>
@@ -129,35 +152,43 @@ export default function Sidebar() {
                {/* header */}
                <div className={classes.header}>
                   <Popover placement="bottom-start">
-                     <PopoverTrigger>
+                     <PopoverTrigger className="sm:pointer-events-none">
                         {auth && (
                            <AccountItem active={true} type="default" fullName={auth.fullName} />
                         )}
                      </PopoverTrigger>
 
                      <PopoverContent>
-                        <AccountMenu />
+                        <div className="sm:hidden">
+                           <AccountMenu />
+                        </div>
                      </PopoverContent>
                   </Popover>
 
                   <div className="hidden sm:flex">
-                     <Button
-                        className={classes.button}
-                        variant={"push"}
-                        size={"clear"}
-                        colors="secondary"
-                     >
-                        <PlusIcon className="w-[22px]" />
-                     </Button>
+                     <Popover placement="bottom-end">
+                        <PopoverTrigger>
+                           <Button
+                              className={classes.button}
+                              variant={"push"}
+                              size={"clear"}
+                              colors="secondary"
+                           >
+                              <Bars3Icon className="w-[22px]" />
+                           </Button>
+                        </PopoverTrigger>
+
+                        <PopoverContent>
+                           <AccountMenu />
+                        </PopoverContent>
+                     </Popover>
                   </div>
                </div>
 
                {/* search */}
                <div className="mt-[16px] hidden sm:block">
-                  <Search setResult={setResult} />
+                  <Search setIsSearch={setIsSearch} setResult={setResult} />
                </div>
-
-               {/* <div className="mt-[14px] pt-[14px] border-t sm:hidden"></div> */}
             </div>
 
             {/*  conversation list */}
@@ -167,13 +198,13 @@ export default function Sidebar() {
                   <>
                      {status === "successful" ? (
                         <>
-                           {!!conversations.length || !!searchResult.length ? (
+                           {!!conversations.length || searchResult ? (
                               <>
-                                 {renderSearchResult}
+                                 {/* {renderSearchResult} */}
                                  {renderConversations}
                               </>
                            ) : (
-                              <p className="text-center">No conversation jet...</p>
+                              <p className="text-center">...</p>
                            )}
                         </>
                      ) : (

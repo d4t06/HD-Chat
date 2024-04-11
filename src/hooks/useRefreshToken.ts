@@ -22,7 +22,8 @@ const useRefreshToken = () => {
             id: data.userInfo.id,
             token: data.token,
          });
-         return response.data.token;
+
+         return data.token;
       } catch (error) {
          console.log({ message: error });
       }

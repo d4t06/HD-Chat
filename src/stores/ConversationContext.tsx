@@ -38,6 +38,8 @@ const ConversationProvider = ({ children }: { children: ReactNode }) => {
    const [conversations, setConversations] = useState<Conversation[]>([]);
    const [status, setStatus] = useState<StateType["status"]>("loading");
 
+   const ranGetConversation = useRef(false);
+
    const { auth, loading } = useAuth();
 
    const { getAllUserConversations } = useConversationActions();
@@ -45,6 +47,7 @@ const ConversationProvider = ({ children }: { children: ReactNode }) => {
    const handleGetUserConversations = async (auth: AuthType) => {
       try {
          console.log(">>> get user conversation");
+         setStatus("loading");
          await sleep(2000);
          const conversations = await getAllUserConversations(auth.id);
          if (conversations) {
@@ -61,17 +64,14 @@ const ConversationProvider = ({ children }: { children: ReactNode }) => {
       // app always require auth
       if (!auth || loading) return;
 
-      handleGetUserConversations(auth);
-
-      return () => {
-         setStatus("loading");
-      };
+      if (!ranGetConversation.current) {
+         ranGetConversation.current = true;
+         handleGetUserConversations(auth);
+      }
    }, [auth, loading]);
 
    return (
-      <ConversationContext.Provider
-         value={{ state: { conversations, status }, setConversations }}
-      >
+      <ConversationContext.Provider value={{ state: { conversations, status }, setConversations }}>
          {children}
       </ConversationContext.Provider>
    );

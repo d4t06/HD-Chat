@@ -11,12 +11,7 @@ type Props = {
    cb: () => void;
    auth: AuthType;
 };
-export default function SidebarConversationItem({
-   conversation,
-   cb,
-   active,
-   auth,
-}: Props) {
+export default function SidebarConversationItem({ conversation, cb, active, auth }: Props) {
    const classes = {
       active: "!bg-[#c2e7ff]",
       conversationItem: "hover:bg-[#f3f3f5] p-2 sm:px-4 w-full",
@@ -38,9 +33,7 @@ export default function SidebarConversationItem({
             setIsOpenFromParent={setIsOpenMenu}
             placement="bottom"
          >
-            <PopoverTrigger
-               className={`${classes.menuIcon} ${isOpenMenu ? "!block" : ""}`}
-            >
+            <PopoverTrigger className={`${classes.menuIcon} ${isOpenMenu ? "!block" : ""}`}>
                {/* <Button
                   size={"clear"}
                   variant={"push"}

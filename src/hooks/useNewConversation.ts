@@ -1,7 +1,4 @@
-import {
-   selectCurrentConversation,
-   storingConversation,
-} from "@/stores/CurrentConversationSlice";
+import { selectCurrentConversation, storingConversation } from "@/stores/CurrentConversationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import useMessageActions from "./useMessageActions";
 import useConversationActions from "./useConversationActions";
@@ -31,6 +28,7 @@ export default function useSendMessageToNewConversation() {
             content: message,
             from_user_id: auth.id,
             type: "text",
+            status: "seen",
          };
 
          const ownerMember: MemberSchema = {
@@ -45,14 +43,14 @@ export default function useSendMessageToNewConversation() {
             user_id: tempUser.id,
          };
 
-         const m1 = await addMember(ownerMember);
-         const m2 = await addMember(member);
+         const owner = await addMember(ownerMember);
+         const other = await addMember(member);
 
-         if (!m1 || !m2) throw new Error("member not found");
+         if (!owner || !other) throw new Error("member not found");
 
-         m2["user"] = tempUser;
+         other["user"] = tempUser;
 
-         c["members"] = [m1, m2];
+         c["members"] = [owner, other];
 
          const newConversations = [c, ...conversations];
          setConversations(newConversations);
@@ -64,7 +62,7 @@ export default function useSendMessageToNewConversation() {
             })
          );
 
-         await sendMessage(firstMessage);
+         await sendMessage({ message: firstMessage, toUserIds: [other.user_id] }, {});
       } catch (error) {
          console.log({ message: error });
       }

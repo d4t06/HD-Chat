@@ -133,15 +133,14 @@ export function PopoverTrigger({
    }
 
    return (
-      <button
-         type="button"
+      <div
          ref={refs.setReference}
          data-state={isOpen ? "open" : "closed"}
          className={`${className ?? ""}`}
          {...getReferenceProps(props)}
       >
          {children}
-      </button>
+      </div>
    );
 }
 

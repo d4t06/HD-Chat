@@ -1,5 +1,5 @@
 import { generateId, sleep } from "@/utils/appHelper";
-import { ChangeEvent, useRef } from "react";
+import { ChangeEvent } from "react";
 import usePrivateRequest from "./usePrivateRequest";
 import useMessageActions from "./useMessageActions";
 import { useDispatch, useSelector } from "react-redux";
@@ -112,21 +112,26 @@ export default function useUploadImage() {
             newMessageSchema.status = "seen";
             newMessageSchema.content = newImage.image_url;
 
-            const newMessage = await sendMessage(newMessageSchema, { update: false });
+            const toUserIds = currentConversationInStore.members.map((m) => m.user_id);
+
+            const newMessage = await sendMessage(
+               { message: newMessageSchema, toUserIds },
+               { update: false }
+            );
             if (!newMessage) throw new Error("error when send message");
 
             dispatch(
                storingConversation({
                   messages: [newMessage],
                   tempImageMessages: tempMessageList,
-                  replace: false,
                })
             );
 
             console.log("upload file finish");
          }
       } catch (error) {
-         console.log(error);
+         console.log({ message: error });
+         dispatch(storingConversation({ tempImages: [], tempImageMessages: [] }));
       }
    };
 
