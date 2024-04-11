@@ -21,7 +21,9 @@ export default function useMessageActions() {
          setIsFetching(true);
          if (import.meta.env.DEV) await sleep(500);
 
-         const res = await privateRequest.get(`${MESSAGE_URL}?conversationID=${conversation_id}`);
+         const res = await privateRequest.get(
+            `${MESSAGE_URL}?conversationID=${conversation_id}`
+         );
          return res.data.data as Message[];
       } catch (error) {
          console.log(error);
@@ -30,7 +32,16 @@ export default function useMessageActions() {
       }
    };
 
-   const sendMessage = async (message: MessageSchema, { update = true }: { update?: boolean }) => {
+   const sendMessage = async (
+      {
+         message,
+         toUserIds,
+      }: {
+         message: MessageSchema;
+         toUserIds: number[];
+      },
+      { update = true }: { update?: boolean }
+   ) => {
       try {
          if (!socket) return;
 
@@ -45,7 +56,12 @@ export default function useMessageActions() {
             );
          }
 
-         socket.send("/app/messages", {}, JSON.stringify(message));
+         const stompMessage: StompMessage = {
+            message: newMessage,
+            to_user_ids: toUserIds,
+         };
+
+         socket.send("/app/messages", {}, JSON.stringify(stompMessage));
 
          return newMessage;
       } catch (error) {

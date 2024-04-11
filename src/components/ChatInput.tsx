@@ -1,6 +1,6 @@
-import { PaperAirplaneIcon, PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { PaperAirplaneIcon, PhotoIcon } from "@heroicons/react/24/outline";
 import Button from "./ui/Button";
-import { ElementRef, FormEvent, KeyboardEvent, ReactNode, useMemo, useRef, useState } from "react";
+import { ElementRef, KeyboardEvent, ReactNode, useMemo, useRef, useState } from "react";
 import { useSocket } from "@/stores/SocketContext";
 import { useSelector } from "react-redux";
 import { selectCurrentConversation } from "@/stores/CurrentConversationSlice";
@@ -17,19 +17,16 @@ export default function ChatInput() {
 
    //hooks
    const { auth } = useAuth();
-   const { currentConversationInStore, tempImages } = useSelector(selectCurrentConversation);
+
    const { socket } = useSocket();
    const { sendMessage } = useMessageActions();
    const { handleInputChange, handleSendImage } = useUploadImage();
-
    const { sendMessageToNewConversation } = useSendMessageToNewConversation();
+   const { currentConversationInStore, tempImages } = useSelector(
+      selectCurrentConversation
+   );
 
    const clear = () => setMessage("");
-
-   // const handleTriggleSendImage = () => {
-   //    const inputEle = e.target as HTMLInputElement & { files: FileList };
-   //    const fileLists = inputEle.files;
-   // };
 
    const handleSendMessage = async (type: "image" | "text" | "icon") => {
       try {
@@ -48,7 +45,7 @@ export default function ChatInput() {
                await handleSendImage(imageInputRef.current);
                break;
             case "text":
-            if (!message) return;
+               if (!message) return;
 
                const messageSchema: MessageSchema = {
                   conversation_id: currentConversationInStore.id,
@@ -57,14 +54,14 @@ export default function ChatInput() {
                   type: "text",
                   status: "sending",
                };
-               return sendMessage(messageSchema, {});
+
+               const toUserIds = currentConversationInStore.members.map((m) => m.user_id);
+               return sendMessage({ message: messageSchema, toUserIds }, {});
             case "icon":
          }
       } catch (error) {
          console.log({ message: error });
       } finally {
-         console.log("run finally");
-
          clear();
       }
    };
@@ -73,7 +70,13 @@ export default function ChatInput() {
       if (e.code === "Enter") handleSendMessage("text");
    };
 
-   const SendButton = ({ children, onClick }: { children: ReactNode; onClick: () => void }) => {
+   const SendButton = ({
+      children,
+      onClick,
+   }: {
+      children: ReactNode;
+      onClick: () => void;
+   }) => {
       return (
          <Button
             className={`h-[34px] w-[34px] ml-[10px]`}
@@ -118,7 +121,11 @@ export default function ChatInput() {
    };
 
    return (
-      <div className={`${classes.container} ${tempImages.length ? "items-end" : "items-center"}`}>
+      <div
+         className={`${classes.container} ${
+            tempImages.length ? "items-end" : "items-center"
+         }`}
+      >
          <input
             ref={imageInputRef}
             onChange={handleInputChange}

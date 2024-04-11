@@ -54,3 +54,8 @@ type Message = {
 };
 
 type MessageSchema = Omit<Message, "id" | "sent_at" | "from_user">;
+
+type StompMessage = {
+   message: Message;
+   to_user_ids: number[];
+};
