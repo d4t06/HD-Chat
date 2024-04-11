@@ -1,9 +1,12 @@
+import { useSocket } from "@/stores/SocketContext";
 import usePrivateRequest from "./usePrivateRequest";
 
 const CONVERSATION_URL = "/conversations";
 
 export default function useConversationActions() {
    const privateRequest = usePrivateRequest();
+
+   const { socket } = useSocket();
 
    const getAllUserConversations = async (user_id: number) => {
       const res = await privateRequest.get(CONVERSATION_URL, {
@@ -20,9 +23,15 @@ export default function useConversationActions() {
       return res.data.data as Conversation;
    };
 
-   const deleteConversation = () => {
-      console.log("delete conversation");
+   const sendConversation = ({ c, toUserID }: { c: Conversation; toUserID: number }) => {
+      if (!socket) return;
+
+      socket.send(
+         "/app/conversations",
+         {},
+         JSON.stringify({ conversation: c, to_user_id: toUserID })
+      );
    };
 
-   return { createConversation, getAllUserConversations, deleteConversation };
+   return { createConversation, getAllUserConversations, sendConversation };
 }

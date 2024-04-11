@@ -8,10 +8,7 @@ type Props = {
 export default function MessageContent({ message, self }: Props) {
    const classes = {
       textContainer: "bg-[#f3f3f5] px-[12px] py-[6px] rounded-[8px] break-words overflow-hidden",
-   };
-
-   console.log('check message type', message.type);
-   
+   };   
 
    switch (message.type) {
       case "text":

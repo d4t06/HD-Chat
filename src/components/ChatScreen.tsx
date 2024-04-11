@@ -4,34 +4,23 @@ import AccountItem from "./AccountItem";
 import ConversationItem from "./ConversationItem";
 import { useAuth } from "@/stores/AuthContext";
 import ChatInput from "./ChatInput";
-import { useSelector } from "react-redux";
-import { selectCurrentConversation } from "@/stores/CurrentConversationSlice";
 import useCurrentConversationMessage from "@/hooks/useCurrentConversationMessages";
-// import MessageItem from "./MessageItem";
-// import { useRef } from "react";
 import MessageList from "./MessageList";
-import { useMemo } from "react";
+import { ElementRef, useRef } from "react";
 
 export default function ChatScreen() {
-   // const from_user_id = useRef<number | null>(null);
-   // const showAvatar = useRef(false);
+   const lastMessageRef = useRef<ElementRef<"div">>(null);
 
    const classes = {
       container: "h-screen overflow-hidden relative flex flex-col",
       button: "p-[4px]",
-      messageListContainer:
-         "flex-grow-1 p-2 sm:p-4 h-full overflow-auto flex flex-col items-start space-y-[2px]",
+      messageListContainer: "flex-grow-1 p-2 sm:p-4 h-full overflow-auto space-y-[2px]",
    };
 
    // hooks
    const { auth } = useAuth();
-
-   useCurrentConversationMessage();
-
-   const { messageStatus, currentConversationInStore, tempUser, messages } =
-      useSelector(selectCurrentConversation);
-
-   // console.log("chat screen render");
+   const { currentConversationInStore, tempUser, messageStatus } =
+      useCurrentConversationMessage();
 
    if ((!currentConversationInStore && !tempUser) || !auth) return <></>;
 
@@ -92,10 +81,12 @@ export default function ChatScreen() {
                   {messageStatus === "error" && <p>Some thing went wrong</p>}
                </>
             )}
+
+            <div className="!mb-[30px]" ref={lastMessageRef}></div>
          </div>
 
          {/* chat input */}
-         <ChatInput />
+         <ChatInput lastMessageRef={lastMessageRef} />
       </div>
    );
 }

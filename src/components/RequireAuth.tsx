@@ -16,11 +16,14 @@ export default function RequireAuth() {
 
       const updateLastSeen = async () => {
          try {
-            if (auth)
+            if (auth) {
+               console.log(">>> api update last seen");
+
                privateRequest.patch(`/users/${auth.id}`, {
                   last_seen: new Date().toISOString(),
                   fullName: auth.fullName,
                });
+            }
          } catch (error) {
             console.log({ message: error });
          } finally {

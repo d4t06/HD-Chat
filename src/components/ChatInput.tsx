@@ -1,6 +1,14 @@
 import { PaperAirplaneIcon, PhotoIcon } from "@heroicons/react/24/outline";
 import Button from "./ui/Button";
-import { ElementRef, KeyboardEvent, ReactNode, useMemo, useRef, useState } from "react";
+import {
+   ElementRef,
+   KeyboardEvent,
+   ReactNode,
+   RefObject,
+   useMemo,
+   useRef,
+   useState,
+} from "react";
 import { useSocket } from "@/stores/SocketContext";
 import { useSelector } from "react-redux";
 import { selectCurrentConversation } from "@/stores/CurrentConversationSlice";
@@ -11,9 +19,14 @@ import useUploadImage from "@/hooks/useUploadImage";
 import PreviewImageList from "./PreviewImagesList";
 // import useMemberActions from "@/hooks/useMemberActions";
 
-export default function ChatInput() {
+type Props = {
+   lastMessageRef: RefObject<HTMLDivElement>;
+};
+
+export default function ChatInput({ lastMessageRef }: Props) {
    const [message, setMessage] = useState("");
    const imageInputRef = useRef<ElementRef<"input">>(null);
+   const isFetching = useRef(false);
 
    //hooks
    const { auth } = useAuth();
@@ -30,9 +43,8 @@ export default function ChatInput() {
 
    const handleSendMessage = async (type: "image" | "text" | "icon") => {
       try {
-         console.log("check type", type);
+         if (!socket || !auth) throw new Error("socket not found");
 
-         if (!socket || !auth) return;
          if (!currentConversationInStore) {
             return sendMessageToNewConversation(message);
          }
@@ -63,11 +75,22 @@ export default function ChatInput() {
          console.log({ message: error });
       } finally {
          clear();
+         isFetching.current = false;
+
+         lastMessageRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+         });
       }
    };
 
-   const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === "Enter") handleSendMessage("text");
+   const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.code === "Enter") {
+         if (!isFetching.current) {
+            isFetching.current = true;
+            handleSendMessage("text");
+         }
+      }
    };
 
    const SendButton = ({
@@ -151,7 +174,7 @@ export default function ChatInput() {
                   disabled={!!tempImages.length}
                   onChange={(e) => setMessage(e.target.value)}
                   value={message}
-                  onKeyDown={handleKeyDown}
+                  onKeyUp={handleKeyUp}
                />
             </div>
          </div>

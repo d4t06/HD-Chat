@@ -1,77 +1,53 @@
-import useConversationActions from "@/hooks/useConversationActions";
 import {
    Dispatch,
    ReactNode,
    SetStateAction,
    createContext,
    useContext,
-   useEffect,
-   useRef,
    useState,
 } from "react";
-import { AuthType, useAuth } from "./AuthContext";
-import { sleep } from "@/utils/appHelper";
-
 type StateType = {
    conversations: Conversation[];
+   tempConversations: Conversation[];
    status: "loading" | "successful" | "error";
 };
 
 const initState: StateType = {
    conversations: [],
+   tempConversations: [],
    status: "loading",
 };
 
 type ContextType = {
    state: StateType;
    setConversations: Dispatch<SetStateAction<Conversation[]>>;
+   setTempConversations: Dispatch<SetStateAction<Conversation[]>>;
+   setStatus: Dispatch<SetStateAction<StateType["status"]>>;
 };
 
 const initContext: ContextType = {
    state: initState,
    setConversations: () => {},
+   setTempConversations: () => {},
+   setStatus: () => {},
 };
 
 const ConversationContext = createContext<ContextType>(initContext);
 
 const ConversationProvider = ({ children }: { children: ReactNode }) => {
    const [conversations, setConversations] = useState<Conversation[]>([]);
+   const [tempConversations, setTempConversations] = useState<Conversation[]>([]);
    const [status, setStatus] = useState<StateType["status"]>("loading");
 
-   const ranGetConversation = useRef(false);
-
-   const { auth, loading } = useAuth();
-
-   const { getAllUserConversations } = useConversationActions();
-
-   const handleGetUserConversations = async (auth: AuthType) => {
-      try {
-         console.log(">>> get user conversation");
-         setStatus("loading");
-         await sleep(2000);
-         const conversations = await getAllUserConversations(auth.id);
-         if (conversations) {
-            setConversations(conversations);
-         }
-         setStatus("successful");
-      } catch (error) {
-         console.log({ message: error });
-         setStatus("error");
-      }
-   };
-
-   useEffect(() => {
-      // app always require auth
-      if (!auth || loading) return;
-
-      if (!ranGetConversation.current) {
-         ranGetConversation.current = true;
-         handleGetUserConversations(auth);
-      }
-   }, [auth, loading]);
-
    return (
-      <ConversationContext.Provider value={{ state: { conversations, status }, setConversations }}>
+      <ConversationContext.Provider
+         value={{
+            state: { conversations, tempConversations, status },
+            setConversations,
+            setTempConversations,
+            setStatus,
+         }}
+      >
          {children}
       </ConversationContext.Provider>
    );

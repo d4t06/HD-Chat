@@ -2,7 +2,7 @@ import { sleep } from "@/utils/appHelper";
 import { useState } from "react";
 import usePrivateRequest from "./usePrivateRequest";
 import { useDispatch } from "react-redux";
-import { storingConversation } from "@/stores/CurrentConversationSlice";
+import { storingMessages } from "@/stores/CurrentConversationSlice";
 import { useSocket } from "@/stores/SocketContext";
 
 const MESSAGE_URL = "/messages";
@@ -40,7 +40,7 @@ export default function useMessageActions() {
          message: MessageSchema;
          toUserIds: number[];
       },
-      { update = true }: { update?: boolean }
+      { update = true, sendMessage = true }: { update?: boolean; sendMessage?: boolean }
    ) => {
       try {
          if (!socket) return;
@@ -50,7 +50,7 @@ export default function useMessageActions() {
 
          if (update) {
             dispatch(
-               storingConversation({
+               storingMessages({
                   messages: [newMessage],
                })
             );
@@ -61,7 +61,9 @@ export default function useMessageActions() {
             to_user_ids: toUserIds,
          };
 
-         socket.send("/app/messages", {}, JSON.stringify(stompMessage));
+         if (sendMessage) {
+            socket.send("/app/messages", {}, JSON.stringify(stompMessage));
+         }
 
          return newMessage;
       } catch (error) {

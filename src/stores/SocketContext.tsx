@@ -4,13 +4,10 @@ import {
    SetStateAction,
    createContext,
    useContext,
-   useEffect,
    useState,
 } from "react";
-import { useAuth } from "./AuthContext";
 
-import SockJS from "sockjs-client/dist/sockjs.js";
-import { CompatClient, Stomp } from "@stomp/stompjs";
+import { CompatClient } from "@stomp/stompjs";
 
 type StateType = {
    onlineUsers: string[];
@@ -40,36 +37,10 @@ const SocketProvider = ({ children }: { children: ReactNode }) => {
    const [socket, setSocket] = useState<CompatClient | null>(null);
    const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
 
-   // hooks
-   const { auth, loading } = useAuth();
-
-   useEffect(() => {
-      if (loading || !auth) return;
-
-      let stompClient: WebSocket;
-
-      const handleInitSocketJS = async () => {
-         try {
-            const ws = new SockJS("http://localhost:8080/messages/");
-            const stompClient = Stomp.over(ws);
-
-            // stompClient.connect({}, () => {});
-
-            setSocket(stompClient);
-         } catch (error) {
-            console.log({ message: error });
-         }
-      };
-
-      handleInitSocketJS();
-
-      return () => {
-         if (stompClient) stompClient.close();
-      };
-   }, [loading, auth]);
-
    return (
-      <SocketContext.Provider value={{ state: { socket, onlineUsers }, setOnlineUsers, setSocket }}>
+      <SocketContext.Provider
+         value={{ state: { socket, onlineUsers }, setOnlineUsers, setSocket }}
+      >
          {children}
       </SocketContext.Provider>
    );
@@ -78,10 +49,11 @@ const SocketProvider = ({ children }: { children: ReactNode }) => {
 const useSocket = () => {
    const {
       setOnlineUsers,
+      setSocket,
       state: { onlineUsers, socket },
    } = useContext(SocketContext);
 
-   return { onlineUsers, socket, setOnlineUsers };
+   return { onlineUsers, socket, setOnlineUsers, setSocket };
 };
 
 export default SocketProvider;

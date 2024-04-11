@@ -7,7 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 type Props = {
-   setResult: Dispatch<SetStateAction<User | undefined>>;
+   setResult: Dispatch<SetStateAction<User | null>>;
    setIsSearch: Dispatch<SetStateAction<boolean>>;
 };
 

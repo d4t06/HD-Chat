@@ -4,7 +4,7 @@ import usePrivateRequest from "./usePrivateRequest";
 import { sleep } from "@/utils/appHelper";
 
 type Props = {
-   setResult: Dispatch<SetStateAction<User | undefined>>;
+   setResult: Dispatch<SetStateAction<User | null>>;
    setIsSearch: Dispatch<SetStateAction<boolean>>;
 };
 export default function useSearchUser({ setResult, setIsSearch }: Props) {
@@ -27,7 +27,7 @@ export default function useSearchUser({ setResult, setIsSearch }: Props) {
          const data = res.data.data as User;
 
          if (data) setResult(data);
-         else setResult(undefined);
+         else setResult(null);
       } catch (error) {
       } finally {
          setIsFetching(false);
@@ -36,7 +36,7 @@ export default function useSearchUser({ setResult, setIsSearch }: Props) {
    };
 
    const handleClear = () => {
-      setResult(undefined);
+      setResult(null);
       setPhoneNumber("");
       setIsSearch(false);
       setIsFetching(false);

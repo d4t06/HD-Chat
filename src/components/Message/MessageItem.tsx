@@ -1,15 +1,14 @@
-import { Ref, forwardRef, useMemo } from "react";
+import { useMemo } from "react";
 import AvatarPlaceholder from "../Avatar";
 import { Bars3Icon, FaceSmileIcon } from "@heroicons/react/24/outline";
 import MessageContent from "./MessageContent";
 import ImageMessage from "./ImageMessage";
-// import AvatarPlaceholder from "./Avatar";
 
 type OtherMessage = {
    type: "other";
    user: User;
    message: Message;
-   showAvatar: boolean;
+   isNewSection: boolean;
 };
 
 type TempImageMessage = {
@@ -20,23 +19,18 @@ type TempImageMessage = {
 type SelfMessage = {
    type: "self";
    message: Message;
+   isNewSection: boolean;
 };
 
 function MessageItem(
-   props: (OtherMessage | SelfMessage | TempImageMessage) & { className?: string },
-   ref: Ref<HTMLDivElement>
+   props: (OtherMessage | SelfMessage | TempImageMessage) & { className?: string }
 ) {
    const classes = {
-      messageContainer: "flex w-full group last:pb-[30px]",
-      textContainer: "bg-[#f3f3f5] px-[12px] py-[6px] rounded-[8px] break-words overflow-hidden",
+      messageContainer: "flex group",
+      textContainer:
+         "bg-[#f3f3f5] px-[12px] py-[6px] rounded-[8px] break-words overflow-hidden",
       button: "p-[4px] rounded-[99px] hover:bg-[#f3f3f5] ",
    };
-
-   // console.log(props.type)
-
-   // if (props.type == "other") {
-   //    console.log("message  from other", props.showAvatar);
-   // }
 
    const messageCta = (
       <div className="flex  opacity-0 group-hover:opacity-[1] items-center px-[6px] max-w-[100%]">
@@ -54,26 +48,20 @@ function MessageItem(
       switch (props.type) {
          case "other":
             return (
-               <div ref={ref || null}>
-                  <div className="flex">
-                     <AvatarPlaceholder
-                        fullName={props.user.fullName}
-                        className="mr-[6px] flex-shrink-0"
-                        type="default"
-                        size={"tiny"}
-                        blank={!props.showAvatar}
-                     />
-                     <MessageContent message={props.message} />
-                  </div>
+               <div className="flex">
+                  <AvatarPlaceholder
+                     fullName={props.user.fullName}
+                     className="mr-[6px] flex-shrink-0"
+                     type="default"
+                     size={"tiny"}
+                     blank={!props.isNewSection}
+                  />
+                  <MessageContent message={props.message} />
                </div>
             );
 
          case "self":
-            return (
-               <div ref={ref || null}>
-                  <MessageContent self={true} message={props.message} />
-               </div>
-            );
+            return <MessageContent self={true} message={props.message} />;
          case "temp-image":
             return <ImageMessage type="temp" message={props.message} />;
       }
@@ -84,9 +72,7 @@ function MessageItem(
          case "other":
             return (
                <div className={`${classes.messageContainer} ${props.className || ""}`}>
-                  <div className="max-w-[600px]">{messageContent}</div>
-
-                  {/* cta */}
+                  <div className="max-w-[500px]">{messageContent}</div>
                   {messageCta}
                </div>
             );
@@ -94,11 +80,11 @@ function MessageItem(
          case "temp-image":
             return (
                <div
-                  className={`${classes.messageContainer} flex-row-reverse justify-start  ${
-                     props.className || ''}`}
+                  className={`${
+                     classes.messageContainer
+                  } flex-row-reverse justify-start  ${props.className || ""}`}
                >
-                  <div className="max-w-[600px]">{messageContent}</div>
-
+                  <div className="max-w-[500px]">{messageContent}</div>
                   {messageCta}
                </div>
             );
@@ -108,4 +94,4 @@ function MessageItem(
    return messageContainer;
 }
 
-export default forwardRef(MessageItem);
+export default MessageItem;

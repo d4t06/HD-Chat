@@ -1,9 +1,13 @@
-import { generateId, sleep } from "@/utils/appHelper";
+import { generateId, imageFactory, messageFactory, sleep } from "@/utils/appHelper";
 import { ChangeEvent } from "react";
 import usePrivateRequest from "./usePrivateRequest";
 import useMessageActions from "./useMessageActions";
 import { useDispatch, useSelector } from "react-redux";
-import { selectCurrentConversation, storingConversation } from "@/stores/CurrentConversationSlice";
+import {
+   selectCurrentConversation,
+   storingMessages,
+   storingTempImages,
+} from "@/stores/CurrentConversationSlice";
 import { useAuth } from "@/stores/AuthContext";
 
 const IMAGE_URL = "/images";
@@ -15,35 +19,11 @@ export default function useUploadImage() {
    const { auth } = useAuth();
    const { sendMessage } = useMessageActions();
    const privateRequest = usePrivateRequest();
-   const { currentConversationInStore, tempImages } = useSelector(selectCurrentConversation);
+   const { currentConversationInStore, tempImages } = useSelector(
+      selectCurrentConversation
+   );
 
-   const imageFactory = (data: Partial<ImageSchema>) => {
-      const newImage: ImageSchema = {
-         public_id: "",
-         image_url: "",
-         link_to: "",
-         name: "",
-         size: 0,
-         height: 0,
-         width: 0,
-         ...data,
-      };
-
-      return newImage;
-   };
-
-   const messageFactory = (data: Partial<MessageSchema>) => {
-      const newMessage: MessageSchema = {
-         content: "",
-         conversation_id: 0,
-         from_user_id: 0,
-         status: "sending",
-         type: "image",
-         ...data,
-      };
-
-      return newMessage;
-   };
+   
 
    const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
       if (!currentConversationInStore || !auth) return;
@@ -63,7 +43,7 @@ export default function useUploadImage() {
          processImageList.push(imageObject);
       }
 
-      dispatch(storingConversation({ tempImages: processImageList }));
+      dispatch(storingTempImages({ tempImages: processImageList }));
    };
 
    const handleSendImage = async (inputEle: HTMLInputElement) => {
@@ -86,7 +66,8 @@ export default function useUploadImage() {
             tempMessageList.push(tempImageMessage);
          }
 
-         dispatch(storingConversation({ tempImages: [], tempImageMessages: tempMessageList }));
+         dispatch(storingTempImages({ tempImages: [] }));
+         dispatch(storingMessages({ tempImageMessages: tempMessageList }));
 
          for (let i = 0; i <= fileLists.length - 1; i++) {
             const file = fileLists[i];
@@ -121,17 +102,17 @@ export default function useUploadImage() {
             if (!newMessage) throw new Error("error when send message");
 
             dispatch(
-               storingConversation({
+               storingMessages({
                   messages: [newMessage],
                   tempImageMessages: tempMessageList,
                })
             );
-
-            console.log("upload file finish");
          }
       } catch (error) {
          console.log({ message: error });
-         dispatch(storingConversation({ tempImages: [], tempImageMessages: [] }));
+
+         dispatch(storingTempImages({ tempImages: [] }));
+         dispatch(storingMessages({ tempImageMessages: [] }));
       }
    };
 

@@ -1,31 +1,40 @@
 import { useAuth } from "@/stores/AuthContext";
-import { selectCurrentConversation, storingConversation } from "@/stores/CurrentConversationSlice";
+import { useConversation } from "@/stores/ConversationContext";
+import {
+   selectCurrentConversation,
+   storingMessages,
+} from "@/stores/CurrentConversationSlice";
 import { useSocket } from "@/stores/SocketContext";
 import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 export default function useListenMessage() {
+   const storeRef = useRef<Conversation | null>();
+
+   // hooks
    const { socket } = useSocket();
    const { auth } = useAuth();
    const dispatch = useDispatch();
-
+   const { setTempConversations } = useConversation();
    const { currentConversationInStore } = useSelector(selectCurrentConversation);
 
-   const storeRef = useRef(currentConversationInStore);
-
    const handleReceiveMessage = (message: Message) => {
-      console.log("check current", storeRef.current);
-      console.log("check message", message);
-
       if (message.conversation_id === storeRef.current?.id) {
          dispatch(
-            storingConversation({
+            storingMessages({
                messages: [message],
             })
          );
       } else {
          window.alert(`New message from ${message.from_user_id}`);
       }
+   };
+
+   const handleNewConversation = (c: Conversation) => {
+
+      console.log('check conversation', c);
+      
+      setTempConversations((prev) => [c, ...prev]);
    };
 
    useEffect(() => {
@@ -44,6 +53,17 @@ export default function useListenMessage() {
 
             const payload = JSON.parse(m.body) as Message;
             handleReceiveMessage(payload);
+         });
+
+         socket.subscribe(`/topic/conversations/${auth.id}`, (m) => {
+            if (notifyEle) {
+               try {
+                  notifyEle.play();
+               } catch (error) {}
+            }
+
+            const payload = JSON.parse(m.body) as Conversation;
+            handleNewConversation(payload);
          });
       });
    }, [socket]);

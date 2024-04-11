@@ -39,6 +39,13 @@ type Conversation = {
    members: Member[];
 };
 
+type ConversationDetail = {
+   conversation: Conversation;
+   newMessage: Message | null;
+   countNewMessages: number;
+   name: string;
+};
+
 type ConversationSchema = Omit<Conversation, "id" | "members"> & {};
 
 type NewConversation = {};
@@ -50,12 +57,13 @@ type Message = {
    status: "sending" | "sent" | "received" | "seen";
    from_user_id: number;
    conversation_id: number;
-   sent_at: string;
+   send_at: string;
 };
 
-type MessageSchema = Omit<Message, "id" | "sent_at" | "from_user">;
+type MessageSchema = Omit<Message, "id" | "send_at" | "from_user">;
 
 type StompMessage = {
    message: Message;
    to_user_ids: number[];
 };
+

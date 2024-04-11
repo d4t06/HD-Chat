@@ -20,7 +20,7 @@ export default function PersistLogin() {
             console.error(error);
          } finally {
             if (import.meta.env.DEV) await sleep(500);
-            console.log("persist set auth loading");
+            console.log(">>> Persist finish");
             setLoading(false);
          }
       };

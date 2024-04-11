@@ -8,15 +8,13 @@ const useRefreshToken = () => {
 
    const refresh = async () => {
       try {
+         console.log(">>> api refresh token");
          const response = await axios.get(REFRESH_URL, {
             withCredentials: true,
          });
 
          const data = response.data.data as AuthResponse;
 
-
-         console.log('use refresh set auth');
-         
          setAuth({
             fullName: data.userInfo.fullName,
             id: data.userInfo.id,

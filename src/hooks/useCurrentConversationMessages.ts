@@ -1,27 +1,44 @@
 import { useEffect } from "react";
 import useMessageActions from "./useMessageActions";
 import { useDispatch, useSelector } from "react-redux";
-import { selectCurrentConversation, storingConversation } from "@/stores/CurrentConversationSlice";
-import { useConversation } from "@/stores/ConversationContext";
+import {
+   selectCurrentConversation,
+   storingMessages,
+} from "@/stores/CurrentConversationSlice";
 
 export default function useCurrentConversationMessage() {
    // hooks
    const dispatch = useDispatch();
-   const { status: getConversationStatus } = useConversation();
-   const { currentConversationInStore, tempUser, messageStatus } =
-      useSelector(selectCurrentConversation);
+   const { currentConversationInStore, tempUser, messageStatus } = useSelector(
+      selectCurrentConversation
+   );
    const { getCurrentConversationMessages } = useMessageActions();
 
    const handleInitConversation = async () => {
       try {
-         // if found conversation
-         if (!currentConversationInStore) return;
-
-         const messages = await getCurrentConversationMessages(currentConversationInStore.id);
+         // if no conversation in store
+         if (!currentConversationInStore)
+            return dispatch(
+               storingMessages({
+                  messageStatus: "successful",
+               })
+            );
 
          dispatch(
-            storingConversation({
-               messages: messages || [],
+            storingMessages({
+               messageStatus: "loading",
+            })
+         );
+
+         const messages = await getCurrentConversationMessages(
+            currentConversationInStore.id
+         );
+
+         if (!messages) throw new Error("Messages is undefined");
+
+         dispatch(
+            storingMessages({
+               messages: messages,
                messageStatus: "successful",
                replace: true,
             })
@@ -29,7 +46,7 @@ export default function useCurrentConversationMessage() {
       } catch (error) {
          console.log({ message: error });
          dispatch(
-            storingConversation({
+            storingMessages({
                messageStatus: "error",
             })
          );
@@ -38,22 +55,8 @@ export default function useCurrentConversationMessage() {
 
    // problem after send new message to new user auto set status = loading
    useEffect(() => {
-      if (getConversationStatus === "loading" || getConversationStatus === "error") return;
+      handleInitConversation();
+   }, [currentConversationInStore]);
 
-      if (messageStatus === "successful") return;
-
-      if (!currentConversationInStore) {
-         dispatch(
-            storingConversation({
-               messageStatus: "successful",
-            })
-         );
-      } else handleInitConversation();
-
-      // return () => {
-      //    dispatch(
-      //       storingConversation({ messageStatus: "loading", messages: [], replace: true })
-      //    );
-      // };
-   }, [currentConversationInStore, tempUser]);
+   return { currentConversationInStore, tempUser, messageStatus };
 }

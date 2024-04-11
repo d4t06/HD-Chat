@@ -41,7 +41,7 @@ export default function ConversationItem({ c, auth, type, desc, ...props }: Prop
          else
             finalDesc.current = recipient.current?.last_seen
                ? "Last seen: " +
-                 new Date(recipient.current.last_seen).toLocaleString("en-us")
+                 new Date(recipient.current.last_seen).toLocaleString()
                : "";
    }
 
@@ -50,7 +50,7 @@ export default function ConversationItem({ c, auth, type, desc, ...props }: Prop
          desc={finalDesc.current}
          type="default"
          {...props}
-         fullName={conversationName}
+         fullName={conversationName || 'sdfsdf'}
       />
    );
 }

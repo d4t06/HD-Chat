@@ -4,7 +4,7 @@ export const sleep = (time: number) =>
          rs();
       }, time);
    });
- 
+
 export const generateId = (name: string): string => {
    const convertToEn = (str: string) => {
       const newString = str
@@ -19,4 +19,38 @@ export const generateId = (name: string): string => {
       return newString;
    };
    return convertToEn(name).replaceAll(/[\W_]/g, "-");
+};
+
+export const convertDateStringToString = (string: string) => {
+   const date = new Date(string);
+
+   return date.toLocaleString("en-us");
+};
+
+export const imageFactory = (data: Partial<ImageSchema>) => {
+   const newImage: ImageSchema = {
+      public_id: "",
+      image_url: "",
+      link_to: "",
+      name: "",
+      size: 0,
+      height: 0,
+      width: 0,
+      ...data,
+   };
+
+   return newImage;
+};
+
+export const messageFactory = (data: Partial<MessageSchema>) => {
+   const newMessage: MessageSchema = {
+      content: "",
+      conversation_id: 0,
+      from_user_id: 0,
+      status: "sending",
+      type: "image",
+      ...data,
+   };
+
+   return newMessage;
 };

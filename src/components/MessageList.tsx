@@ -9,33 +9,44 @@ type Props = {
 };
 
 export default function MessageList({ auth }: Props) {
-
-   const { currentConversationInStore, messages, tempImageMessages } =
-      useSelector(selectCurrentConversation);
+   const { currentConversationInStore, messages, tempImageMessages } = useSelector(
+      selectCurrentConversation
+   );
 
    const from_user_id = useRef<number | null>(null);
-   let showAvatar = false;
+   let isNewSection = false;
 
-   const renderTempsMessage = useMemo(
-      () =>
-         !!tempImageMessages.length &&
-         tempImageMessages.map((m, index) => (
+   const renderTempsMessage = useMemo(() => {
+      if (!!tempImageMessages.length) {
+         // const isNewSection = messages[messages.length - 1].id !== auth.id;
+
+         return tempImageMessages.map((m, index) => (
             <MessageItem key={index} type="temp-image" message={m} />
-         )),
-      [tempImageMessages]
-   );
+         ));
+      }
+   }, [tempImageMessages]);
 
    const renderMessages = useMemo(
       () =>
          !!messages.length &&
          messages.map((m, index) => {
-            if (m.from_user_id !== from_user_id.current) showAvatar = true;
-            else showAvatar = false;
+            if (m.from_user_id !== from_user_id.current) isNewSection = true;
+            else isNewSection = false;
 
             from_user_id.current = m.from_user_id;
 
             const isSelf = m.from_user_id === auth.id;
-            if (isSelf) return <MessageItem className={showAvatar ? 'pt-[20px]' : ""} key={index} type="self" message={m} />;
+
+            if (isSelf)
+               return (
+                  <MessageItem
+                     className={isNewSection ? "pt-[20px]" : ""}
+                     key={index}
+                     type="self"
+                     isNewSection={isNewSection}
+                     message={m}
+                  />
+               );
 
             const member = currentConversationInStore?.members.find(
                (mem) => mem.user_id === m.from_user_id
@@ -49,8 +60,8 @@ export default function MessageList({ auth }: Props) {
                   type="other"
                   user={member.user}
                   message={m}
-                  showAvatar={showAvatar}
-                  className={showAvatar ? 'pt-[20px]' : ""}
+                  isNewSection={isNewSection}
+                  className={isNewSection ? "pt-[20px]" : ""}
                />
             );
          }),

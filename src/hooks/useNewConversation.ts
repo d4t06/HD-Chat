@@ -1,4 +1,7 @@
-import { selectCurrentConversation, storingConversation } from "@/stores/CurrentConversationSlice";
+import {
+   selectCurrentConversation,
+   storingConversation,
+} from "@/stores/CurrentConversationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import useMessageActions from "./useMessageActions";
 import useConversationActions from "./useConversationActions";
@@ -15,11 +18,11 @@ export default function useSendMessageToNewConversation() {
    const { tempUser } = useSelector(selectCurrentConversation);
 
    const { sendMessage } = useMessageActions();
-   const { createConversation } = useConversationActions();
+   const { createConversation, sendConversation } = useConversationActions();
    const { addMember } = useMemberActions();
 
    const sendMessageToNewConversation = async (message: string) => {
-      if (!auth || !tempUser) return;
+      if (!auth || !tempUser) throw new Error("temp user not found");
       try {
          const c = await createConversation({ name: "" });
 
@@ -48,12 +51,14 @@ export default function useSendMessageToNewConversation() {
 
          if (!owner || !other) throw new Error("member not found");
 
+         const { token, ...restAuth } = auth;
+
          other["user"] = tempUser;
+         owner["user"] = restAuth;
 
          c["members"] = [owner, other];
 
-         const newConversations = [c, ...conversations];
-         setConversations(newConversations);
+         setConversations(() => [c, ...conversations]);
 
          dispatch(
             storingConversation({
@@ -62,7 +67,11 @@ export default function useSendMessageToNewConversation() {
             })
          );
 
-         await sendMessage({ message: firstMessage, toUserIds: [other.user_id] }, {});
+         sendConversation({ c, toUserID: other.user_id });
+         await sendMessage(
+            { message: firstMessage, toUserIds: [other.user_id] },
+            { sendMessage: false }
+         );
       } catch (error) {
          console.log({ message: error });
       }

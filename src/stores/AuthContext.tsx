@@ -7,9 +7,7 @@ import {
    useState,
 } from "react";
 
-export type AuthType = {
-   fullName: string;
-   id: number;
+export type AuthType = User & {
    token: string;
 };
 
