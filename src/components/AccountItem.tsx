@@ -7,6 +7,7 @@ export type AccountItemProps = {
    size?: "primary" | "small";
    className?: string;
    desc?: string;
+   bubble?: number; 
    active?: boolean;
    keepNameInSmall?: boolean;
 };
@@ -37,7 +38,7 @@ export default function AccountItem({
       );
 
    if (props.type === "default") {
-      const { fullName, className, desc, active, keepNameInSmall = false } = props;
+      const { fullName, className, desc, active, keepNameInSmall = false, bubble } = props;
       return (
          <div
             className={`flex cursor-pointer justify-center sm:justify-start ${
@@ -49,10 +50,11 @@ export default function AccountItem({
                type="default"
                size={size}
                fullName={fullName}
+               bubble={bubble}
             />
             <div className={`ml-[10px] ${keepNameInSmall ? "" : "hidden sm:block"}`}>
                <p className="leading-[20px] font-[500] text-[#1f1f1f]">{fullName}</p>
-               {desc && <p className="text-[14px] text-[#808080]">{desc}</p>}
+               {desc && <p className="font-[500] text-[14px] text-[#808080]">{desc}</p>}
             </div>
          </div>
       );

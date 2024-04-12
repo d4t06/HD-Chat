@@ -1,10 +1,11 @@
 import { generateId, imageFactory, messageFactory, sleep } from "@/utils/appHelper";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import usePrivateRequest from "./usePrivateRequest";
 import useMessageActions from "./useMessageActions";
 import { useDispatch, useSelector } from "react-redux";
 import {
    selectCurrentConversation,
+   spliceTempImage,
    storingMessages,
    storingTempImages,
 } from "@/stores/CurrentConversationSlice";
@@ -13,17 +14,20 @@ import { useAuth } from "@/stores/AuthContext";
 const IMAGE_URL = "/images";
 
 export default function useUploadImage() {
+   // const [tempImageMessagesList, setTempImageMessagesList] = useState<MessageSchema[]>(
+   //    []
+   // );
+
+   const tempImageMessagesList = useRef<MessageSchema[]>([]);
    // hooks
    const dispatch = useDispatch();
 
    const { auth } = useAuth();
    const { sendMessage } = useMessageActions();
    const privateRequest = usePrivateRequest();
-   const { currentConversationInStore, tempImages } = useSelector(
+   const { currentConversationInStore, tempImages, tempImageMessages } = useSelector(
       selectCurrentConversation
    );
-
-   
 
    const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
       if (!currentConversationInStore || !auth) return;
@@ -56,18 +60,24 @@ export default function useUploadImage() {
          const tempMessageList: MessageSchema[] = [];
 
          for (const imageSchema of tempImages) {
-            const tempImageMessage = messageFactory({
-               conversation_id: currentConversationInStore.id,
+            const tempImageMessage: MessageSchema = {
+               conversation_id: currentConversationInStore.conversation.id,
                content: imageSchema.image_url,
                from_user_id: auth.id,
                status: "sending",
                type: "image",
-            });
+            };
             tempMessageList.push(tempImageMessage);
          }
 
-         dispatch(storingTempImages({ tempImages: [] }));
-         dispatch(storingMessages({ tempImageMessages: tempMessageList }));
+         dispatch(
+            storingTempImages({
+               tempImages: [],
+               tempImageMessages: tempMessageList,
+            })
+         );
+
+         tempImageMessagesList.current = tempMessageList;
 
          for (let i = 0; i <= fileLists.length - 1; i++) {
             const file = fileLists[i];
@@ -78,6 +88,8 @@ export default function useUploadImage() {
             const controller = new AbortController();
             if (import.meta.env.DEV) await sleep(1000);
 
+            const newMessageSchema = tempImageMessagesList.current[0];
+
             const res = await privateRequest.post(IMAGE_URL, formData, {
                headers: { "Content-Type": "multipart/form-data" },
                signal: controller.signal,
@@ -85,36 +97,44 @@ export default function useUploadImage() {
 
             const newImage = res.data.data as ImageType;
 
-            const newMessageSchema = { ...tempMessageList[0] };
-            if (!newMessageSchema) return;
+            if (!newMessageSchema) throw new Error("message schema is undefine");
 
-            tempMessageList.splice(0, 1);
-
-            newMessageSchema.status = "seen";
-            newMessageSchema.content = newImage.image_url;
-
-            const toUserIds = currentConversationInStore.members.map((m) => m.user_id);
+            const toUserIds = currentConversationInStore.conversation.members.map(
+               (m) => m.user_id
+            );
 
             const newMessage = await sendMessage(
-               { message: newMessageSchema, toUserIds },
+               {
+                  message: {
+                     ...newMessageSchema,
+                     status: "seen",
+                     content: newImage.image_url,
+                  },
+                  toUserIds,
+               },
                { update: false }
             );
+
             if (!newMessage) throw new Error("error when send message");
 
             dispatch(
                storingMessages({
                   messages: [newMessage],
-                  tempImageMessages: tempMessageList,
                })
             );
+            dispatch(spliceTempImage());
+            // setTempImageMessagesList(prev => prev.slice(1))
          }
       } catch (error) {
          console.log({ message: error });
 
-         dispatch(storingTempImages({ tempImages: [] }));
-         dispatch(storingMessages({ tempImageMessages: [] }));
+         dispatch(storingTempImages({ tempImages: [], tempImageMessages: [] }));
       }
    };
+
+   useEffect(() => {
+      tempImageMessagesList.current = tempImageMessages;
+   }, [tempImageMessages]);
 
    return { handleInputChange, handleSendImage };
 }

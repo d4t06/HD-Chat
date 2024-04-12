@@ -1,22 +1,25 @@
-import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createSlice, current } from "@reduxjs/toolkit";
 
 type MessageType = {
    messageStatus: "" | "loading" | "more-loading" | "successful" | "error";
    page: number;
    size: number;
    messages: Message[];
-   tempImageMessages: MessageSchema[];
-   tempImages: ImageSchema[];
 };
 
 type ConversationType = {
-   currentConversationInStore: Conversation | null;
+   currentConversationInStore: {
+      conversation: Conversation;
+      name: string;
+      recipient: User | null;
+   } | null;
    tempUser: User | null;
 };
 
 type StateType = MessageType &
    ConversationType & {
       tempImages: ImageSchema[];
+      tempImageMessages: MessageSchema[];
    };
 
 const initState: StateType = {
@@ -30,71 +33,86 @@ const initState: StateType = {
    messageStatus: "loading",
 };
 
-const getUserConversations = createAsyncThunk("getUserConversations", () => {
-   
-})
-
 const currentConversationSlice = createSlice({
    name: "currentConversation",
    initialState: initState,
    reducers: {
-      storingConversation: (state, action: PayloadAction<ConversationType>) => {
+      storingConversation: (
+         state: StateType,
+         action: PayloadAction<ConversationType>
+      ) => {
          const payload = action.payload;
          state.currentConversationInStore = payload.currentConversationInStore || null;
          state.tempUser = payload.tempUser || null;
+      },
+      setMessageStatus: (
+         state: StateType,
+         action: PayloadAction<{ messageStatus: StateType["messageStatus"] }>
+      ) => {
+         state.messageStatus = action.payload.messageStatus;
       },
       storingMessages: (
          state,
          action: PayloadAction<Partial<MessageType> & { replace?: boolean }>
       ) => {
-         const { replace = false, ...payload } = action.payload;
+         const { replace = false, messages = [], ...payload } = action.payload;
 
-         state.page = payload.page || state.page;
-         state.size = payload.size || state.size;
-         state.messageStatus = payload.messageStatus || state.messageStatus;
-
-         state.tempImageMessages = payload.tempImageMessages
-            ? [...payload.tempImageMessages]
-            : state.tempImageMessages;
-
-         state.tempImages = payload.tempImages
-            ? [...payload.tempImages]
-            : state.tempImages;
+         // const newState = { ...state };
 
          if (replace) {
-            state.messages = payload.messages ? [...payload.messages] : [];
+            state.messages = messages;
          } else {
-            state.messages = [...state.messages, ...(payload.messages || state.messages)];
+            state.messages.push(messages[0]);
          }
+
+         Object.assign(state, { ...payload });
       },
 
       storingTempImages: (
          state: StateType,
-         action: PayloadAction<{ tempImages: StateType["tempImages"] }>
+         action: PayloadAction<{
+            tempImages?: StateType["tempImages"];
+            tempImageMessages?: StateType["tempImageMessages"];
+         }>
       ) => {
          const payload = action.payload;
-         state.tempImages = payload.tempImages || state.tempImages;
+         Object.assign(state, payload);
       },
 
-      reset: (state, _action: PayloadAction<undefined>) => {
-         return Object.assign(state, initState);
+      spliceTempImage: (state: StateType, _action: PayloadAction) => {
+
+         console.log('check statse', current(state.tempImageMessages));
+         
+
+         state.tempImageMessages.pop();
+      },
+
+      reset: (_state, _action: PayloadAction<undefined>) => {
+         return initState;
       },
    },
 });
 
-const selectCurrentConversation = (state: { currentConversation: StateType }) => {
+export const selectCurrentConversation = (state: { currentConversation: StateType }) => {
    return state.currentConversation;
 };
 
-const { storingConversation, reset, storingMessages, storingTempImages } =
-   currentConversationSlice.actions;
+const {
+   storingConversation,
+   reset,
+   storingMessages,
+   storingTempImages,
+   setMessageStatus,
+   spliceTempImage,
+} = currentConversationSlice.actions;
 
 export {
-   selectCurrentConversation,
    reset,
    storingConversation,
    storingMessages,
    storingTempImages,
+   setMessageStatus,
+   spliceTempImage,
 };
 
 export default currentConversationSlice.reducer;

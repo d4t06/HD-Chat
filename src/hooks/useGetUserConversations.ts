@@ -34,10 +34,13 @@ export default function useGetUserConversation() {
          const conversations = await getAllUserConversations(auth.id);
          if (conversations) {
             // setConversations(conversations);
-            dispatch(
+            return dispatch(
                initConversationDetail({ auth, conversations, status: "successful" })
             );
          }
+
+         return dispatch(setConversationStatus({ status: "successful" }));
+
          // setStatus("successful");
       } catch (error) {
          console.log({ message: error });

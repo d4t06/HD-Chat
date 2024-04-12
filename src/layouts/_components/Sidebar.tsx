@@ -14,7 +14,7 @@ export default function Sidebar() {
    const { auth } = useAuth();
 
    const classes = {
-      container: "relative w-[70px] sm:w-[360px] flex-shrink-0 border-r h-screen",
+      container: "relative w-[70px] sm:w-[360px] flex-shrink-0 border-r border-black/10 h-screen",
       button: "p-[4px]",
       header: "flex justify-center sm:justify-between items-center",
    };

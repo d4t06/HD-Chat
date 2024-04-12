@@ -1,7 +1,6 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { AuthType } from "./AuthContext";
-
-
+import { conversationDetailFactory } from "@/utils/appHelper";
 
 type StateType = {
    conversationDetails: ConversationDetail[];
@@ -11,34 +10,6 @@ type StateType = {
 const initialState: StateType = {
    conversationDetails: [],
    status: "loading",
-};
-
-const getConversationName = (c: Conversation, auth: AuthType) => {
-   if (!!c.name) return c.name;
-
-   const anotherMembers = c.members.filter((m) => m.user_id != auth.id);
-   if (c.members.length === 2) {
-      return anotherMembers[0].user.fullName;
-   }
-
-   let name = "";
-   anotherMembers.forEach((m) => (name += m.user.fullName + ", "));
-   return name;
-};
-
-const conversationDetailFactory = (conversations: Conversation[], auth: AuthType) => {
-   return conversations.map((c) => {
-      const conversationName = getConversationName(c, auth);
-
-      const conversationDetail: ConversationDetail = {
-         conversation: c,
-         countNewMessages: 0,
-         newMessage: null,
-         name: conversationName,
-      };
-
-      return conversationDetail;
-   });
 };
 
 const conversationSlice = createSlice({
@@ -56,6 +27,7 @@ const conversationSlice = createSlice({
          const { auth, conversations, status } = action.payload;
 
          const conversationDetails = conversationDetailFactory(conversations, auth);
+
          state.conversationDetails = conversationDetails || state.conversationDetails;
          state.status = status || state.status;
       },
@@ -67,45 +39,50 @@ const conversationSlice = createSlice({
       ) => {
          state.status = action.payload.status || state.status;
       },
-      addConversation: (
+      addNewConversation: (
          state: StateType,
          action: PayloadAction<{
-            conversations: Conversation[];
+            newConversationPayload: NewConversationPayload;
             auth: AuthType;
          }>
       ) => {
-         const { auth, conversations } = action.payload;
+         const {
+            auth,
+            newConversationPayload: { conversation, message },
+         } = action.payload;
 
-         const conversationDetail = conversationDetailFactory(conversations, auth);
+         const conversationDetail = conversationDetailFactory([conversation], auth);
+         conversationDetail[0].newMessage = message;
+         conversationDetail[0].countNewMessages = 1;
 
-         state.conversationDetails =
-            [...(conversationDetail || []), ...state.conversationDetails] ||
-            state.conversationDetails;
+         state.conversationDetails.unshift(conversationDetail[0]);
+      },
+
+      addConversation: (
+         state: StateType,
+         action: PayloadAction<{
+            conversationDetail: ConversationDetail;
+         }>
+      ) => {
+         state.conversationDetails.unshift(action.payload.conversationDetail);
       },
 
       addMessage(
          state: StateType,
          action: PayloadAction<{
             message: Message;
-            conversation_id: number;
          }>
       ) {
-         const { message, conversation_id } = action.payload;
+         const { message } = action.payload;
 
-         const newConversationsDetails = [...state.conversationDetails];
-         const index = newConversationsDetails.findIndex(
-            (c) => c.conversation.id === conversation_id
+         const target = state.conversationDetails.find(
+            (c) => c.conversation.id === message.conversation_id
          );
-         if (index === -1) console.log("conversation not found");
 
-         const newObj = { ...newConversationsDetails[index] };
+         if (!target) return state;
 
-         newObj.newMessage = message;
-         newObj.countNewMessages = newObj.countNewMessages + 1;
-
-         newConversationsDetails[index] = newObj;
-
-         state.conversationDetails = newConversationsDetails || state.conversationDetails;
+         target.newMessage = message;
+         target.countNewMessages = target.countNewMessages + 1;
       },
       seenMessages: (
          state: StateType,
@@ -115,23 +92,17 @@ const conversationSlice = createSlice({
       ) => {
          const { conversation_id } = action.payload;
 
-         const newConversationsDetails = [...state.conversationDetails];
-         const index = newConversationsDetails.findIndex(
+         const target = state.conversationDetails.find(
             (c) => c.conversation.id === conversation_id
          );
-         if (index === -1) console.log("conversation not found");
 
-         const newObj = { ...newConversationsDetails[index] };
+         if (!target) return state;
 
-         newObj.countNewMessages = 0;
-         newObj.newMessage = null;
-
-         newConversationsDetails[index] = newObj;
-
-         state.conversationDetails = newConversationsDetails || state.conversationDetails;
+         target.newMessage = null;
+         target.countNewMessages = 0;
       },
-      reset: (state: StateType) => {
-         Object.assign(state, initialState);
+      reset: (_state: StateType) => {
+         return initialState;
       },
    },
 });
@@ -143,6 +114,7 @@ const {
    reset,
    seenMessages,
    setConversationStatus,
+   addNewConversation,
 } = conversationSlice.actions;
 
 export const selectAllConversations = (state: { conversations: StateType }) => {
@@ -156,6 +128,7 @@ export {
    reset,
    seenMessages,
    setConversationStatus,
+   addNewConversation,
 };
 
 export default conversationSlice.reducer;

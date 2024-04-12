@@ -48,7 +48,7 @@ export default function MessageList({ auth }: Props) {
                   />
                );
 
-            const member = currentConversationInStore?.members.find(
+            const member = currentConversationInStore?.conversation.members.find(
                (mem) => mem.user_id === m.from_user_id
             );
 

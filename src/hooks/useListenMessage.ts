@@ -1,5 +1,5 @@
 import { useAuth } from "@/stores/AuthContext";
-import { useConversation } from "@/stores/ConversationContext";
+import { addMessage, addNewConversation } from "@/stores/ConversationSlice";
 import {
    selectCurrentConversation,
    storingMessages,
@@ -9,32 +9,40 @@ import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 export default function useListenMessage() {
-   const storeRef = useRef<Conversation | null>();
-
    // hooks
    const { socket } = useSocket();
    const { auth } = useAuth();
    const dispatch = useDispatch();
-   const { setTempConversations } = useConversation();
    const { currentConversationInStore } = useSelector(selectCurrentConversation);
 
+   const storeRef = useRef<typeof currentConversationInStore | null>();
+
+   const scrollToLastMessage = () => {
+      const lastMessage = document.querySelector(".last-message") as HTMLDListElement;
+      lastMessage.scrollIntoView({
+         behavior: "smooth",
+         block: "start",
+      });
+   };
+
    const handleReceiveMessage = (message: Message) => {
-      if (message.conversation_id === storeRef.current?.id) {
+      if (message.conversation_id === storeRef.current?.conversation.id) {
          dispatch(
             storingMessages({
                messages: [message],
             })
          );
+
+         scrollToLastMessage();
       } else {
-         window.alert(`New message from ${message.from_user_id}`);
+         dispatch(addMessage({ message }));
       }
    };
 
-   const handleNewConversation = (c: Conversation) => {
+   const handleNewConversation = (newConversationPayload: NewConversationPayload) => {
+      if (!auth) return;
 
-      console.log('check conversation', c);
-      
-      setTempConversations((prev) => [c, ...prev]);
+      dispatch(addNewConversation({ newConversationPayload, auth }));
    };
 
    useEffect(() => {
@@ -62,7 +70,7 @@ export default function useListenMessage() {
                } catch (error) {}
             }
 
-            const payload = JSON.parse(m.body) as Conversation;
+            const payload = JSON.parse(m.body) as NewConversationPayload;
             handleNewConversation(payload);
          });
       });

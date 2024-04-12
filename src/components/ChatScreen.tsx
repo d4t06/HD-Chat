@@ -1,12 +1,11 @@
-import { ArrowPathIcon, Bars3Icon } from "@heroicons/react/24/outline";
-import Button from "./ui/Button";
-import AccountItem from "./AccountItem";
-import ConversationItem from "./ConversationItem";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "@/stores/AuthContext";
 import ChatInput from "./ChatInput";
 import useCurrentConversationMessage from "@/hooks/useCurrentConversationMessages";
 import MessageList from "./MessageList";
 import { ElementRef, useRef } from "react";
+
+import ChatScreenHeader from "./ChatScreenHeader";
 
 export default function ChatScreen() {
    const lastMessageRef = useRef<ElementRef<"div">>(null);
@@ -22,50 +21,12 @@ export default function ChatScreen() {
    const { currentConversationInStore, tempUser, messageStatus } =
       useCurrentConversationMessage();
 
-   if ((!currentConversationInStore && !tempUser) || !auth) return <></>;
+   if ((currentConversationInStore === null && tempUser === null) || !auth) return <></>;
 
    return (
       <div className={classes.container}>
          {/* top */}
-         <div className="flex flex-row justify-between h-[60px] px-4 py-2 items-center ">
-            <>
-               {currentConversationInStore ? (
-                  <ConversationItem
-                     in="chat-scrren"
-                     keepNameInSmall={true}
-                     type="default"
-                     auth={auth}
-                     c={currentConversationInStore}
-                     size="small"
-                  />
-               ) : (
-                  <>
-                     {tempUser ? (
-                        <AccountItem
-                           keepNameInSmall={true}
-                           type="default"
-                           fullName={tempUser?.fullName}
-                           size="small"
-                           desc="New conversation"
-                        />
-                     ) : (
-                        <p>Some thing went wrong</p>
-                     )}
-                  </>
-               )}
-            </>
-
-            <div className="flex">
-               <Button
-                  className={classes.button + " ml-[10px]"}
-                  variant={"push"}
-                  size={"clear"}
-                  colors="secondary"
-               >
-                  <Bars3Icon className="w-[22px]" />
-               </Button>
-            </div>
-         </div>
+         <ChatScreenHeader />
 
          {/* main content */}
          <div className={classes.messageListContainer}>
@@ -82,7 +43,7 @@ export default function ChatScreen() {
                </>
             )}
 
-            <div className="!mb-[30px]" ref={lastMessageRef}></div>
+            <div className="!mb-[60px] last-message" ref={lastMessageRef}></div>
          </div>
 
          {/* chat input */}

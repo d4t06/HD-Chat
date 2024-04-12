@@ -26,7 +26,7 @@ export default function useMessageActions() {
          );
          return res.data.data as Message[];
       } catch (error) {
-         console.log(error);
+         console.log({ message: error });
       } finally {
          setIsFetching(false);
       }
@@ -40,15 +40,21 @@ export default function useMessageActions() {
          message: MessageSchema;
          toUserIds: number[];
       },
-      { update = true, sendMessage = true }: { update?: boolean; sendMessage?: boolean }
+      opts?: { update?: boolean; sendMessage?: boolean }
    ) => {
       try {
          if (!socket) return;
 
+         const defaultOpts = {
+            update: true,
+            sendMessage: true,
+         };
+         if (opts) Object.assign(defaultOpts, opts);
+
          const res = await privateRequest.post(MESSAGE_URL, message);
          const newMessage = res.data.data as Message;
 
-         if (update) {
+         if (defaultOpts.update) {
             dispatch(
                storingMessages({
                   messages: [newMessage],
@@ -61,7 +67,7 @@ export default function useMessageActions() {
             to_user_ids: toUserIds,
          };
 
-         if (sendMessage) {
+         if (defaultOpts.sendMessage) {
             socket.send("/app/messages", {}, JSON.stringify(stompMessage));
          }
 

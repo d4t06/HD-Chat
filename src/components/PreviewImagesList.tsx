@@ -1,7 +1,11 @@
 import { PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Empty from "./ui/Empty";
 import { useDispatch, useSelector } from "react-redux";
-import { selectCurrentConversation, storingConversation } from "@/stores/CurrentConversationSlice";
+import {
+   selectCurrentConversation,
+   storingConversation,
+   storingTempImages,
+} from "@/stores/CurrentConversationSlice";
 
 export default function PreviewImageList() {
    const dispatch = useDispatch();
@@ -16,7 +20,7 @@ export default function PreviewImageList() {
          URL.revokeObjectURL(image.image_url);
       }
 
-      dispatch(storingConversation({ tempImages: newTempImages }));
+      dispatch(storingTempImages({ tempImages: newTempImages }));
    };
 
    return (

@@ -1,3 +1,5 @@
+import { AuthType } from "@/stores/AuthContext";
+
 export const sleep = (time: number) =>
    new Promise<void>((rs) => {
       setTimeout(() => {
@@ -22,6 +24,7 @@ export const generateId = (name: string): string => {
 };
 
 export const convertDateStringToString = (string: string) => {
+   if (!string) return;
    const date = new Date(string);
 
    return date.toLocaleString("en-us");
@@ -53,4 +56,39 @@ export const messageFactory = (data: Partial<MessageSchema>) => {
    };
 
    return newMessage;
+};
+
+
+const getConversationName = (c: Conversation, auth: AuthType) => {
+   let recipient: User;
+   let name = "";
+
+   if (!!c.name) return { name: c.name, recipient: null };
+
+   const anotherMembers = c.members.filter((m) => m.user_id != auth.id);
+   if (c.members.length === 2) {
+      recipient = anotherMembers[0].user;
+      return { name: recipient.fullName, recipient };
+   }
+
+   anotherMembers.forEach((m) => (name += m.user.fullName + ", "));
+
+   return { name, recipient: null };
+};
+
+
+export const conversationDetailFactory = (conversations: Conversation[], auth: AuthType) => {
+   return conversations.map((c) => {
+      const { name, recipient } = getConversationName(c, auth);
+
+      const conversationDetail: ConversationDetail = {
+         conversation: c,
+         countNewMessages: 0,
+         newMessage: null,
+         name,
+         recipient,
+      };
+
+      return conversationDetail;
+   });
 };

@@ -1,5 +1,6 @@
 import {
    selectCurrentConversation,
+   setMessageStatus,
    storingConversation,
 } from "@/stores/CurrentConversationSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,12 +9,14 @@ import useConversationActions from "./useConversationActions";
 import useMemberActions from "./useMemberActions";
 import { useAuth } from "@/stores/AuthContext";
 import { useConversation } from "@/stores/ConversationContext";
+import { conversationDetailFactory } from "@/utils/appHelper";
+import { addConversation } from "@/stores/ConversationSlice";
 
 export default function useSendMessageToNewConversation() {
    const dispatch = useDispatch();
 
    const { auth } = useAuth();
-   const { setConversations, conversations } = useConversation();
+   // const { setConversations, conversations } = useConversation();
 
    const { tempUser } = useSelector(selectCurrentConversation);
 
@@ -21,17 +24,16 @@ export default function useSendMessageToNewConversation() {
    const { createConversation, sendConversation } = useConversationActions();
    const { addMember } = useMemberActions();
 
-   const sendMessageToNewConversation = async (message: string) => {
+   const sendMessageToNewConversation = async (
+      messageSchemaNoConversation: MessageSchemaNoConversation
+   ) => {
       if (!auth || !tempUser) throw new Error("temp user not found");
       try {
          const c = await createConversation({ name: "" });
 
          const firstMessage: MessageSchema = {
+            ...messageSchemaNoConversation,
             conversation_id: c.id,
-            content: message,
-            from_user_id: auth.id,
-            type: "text",
-            status: "seen",
          };
 
          const ownerMember: MemberSchema = {
@@ -58,20 +60,33 @@ export default function useSendMessageToNewConversation() {
 
          c["members"] = [owner, other];
 
-         setConversations(() => [c, ...conversations]);
+         const cDetail = conversationDetailFactory([c], auth)[0];
+
+         dispatch(addConversation({ conversationDetail: cDetail }));
 
          dispatch(
             storingConversation({
-               currentConversationInStore: c,
+               currentConversationInStore: {
+                  conversation: c,
+                  name: cDetail.name,
+                  recipient: cDetail.recipient,
+               },
                tempUser: null,
             })
          );
 
-         sendConversation({ c, toUserID: other.user_id });
-         await sendMessage(
+         const newMessage = await sendMessage(
             { message: firstMessage, toUserIds: [other.user_id] },
             { sendMessage: false }
          );
+
+         if (!newMessage) throw new Error("new message not found");
+
+         sendConversation({
+            conversation: c,
+            message: newMessage,
+            toUserID: other.user_id,
+         });
       } catch (error) {
          console.log({ message: error });
       }

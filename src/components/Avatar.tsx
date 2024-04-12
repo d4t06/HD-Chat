@@ -2,7 +2,7 @@ import { VariantProps, cva } from "class-variance-authority";
 import Skeleton from "./Skeleton";
 import { generateHSL } from "@/utils/getUniqueColor";
 
-const avatarVariant = cva("", {
+const avatarVariant = cva("flex-shrink-0", {
    variants: {
       size: {
          primary: "h-[44px] w-[44px] text-[24px]",
@@ -21,6 +21,7 @@ interface Props extends VariantProps<typeof avatarVariant> {
    fullName: string;
    className?: string;
    blank?: boolean; //for message item
+   bubble?: number
 }
 
 interface LoadingProps extends VariantProps<typeof avatarVariant> {
@@ -37,7 +38,7 @@ export default function AvatarPlaceholder({ size, ...props }: Props | LoadingPro
       return <Skeleton className={avatarVariant({ size, className: props.className })} />;
 
    if (props.type === "default") {
-      const { fullName, active, className = "", blank = false } = props;
+      const { fullName, active, className = "", blank = false, bubble = 0 } = props;
 
       const color = generateHSL(fullName);
 
@@ -50,6 +51,10 @@ export default function AvatarPlaceholder({ size, ...props }: Props | LoadingPro
                   <p className="text-[#fff]">{fullName.charAt(0)}</p>
                   {active && (
                      <span className="absolute border-[3px] border-white p-[5px] bg-emerald-400 rounded-full bottom-[0px] right-[-2px]"></span>
+                  )}
+                  
+                  {!!bubble && (
+                     <span className="absolute rounded-[99px] top-[-4px] right-[-2px] text-[14px] flex items-center justify-center w-[20px] h-[20px] font-[500] leading-[12px] bg-red-500 text-white">{bubble < 9 ? bubble : "n"}</span>
                   )}
                </div>
             )}

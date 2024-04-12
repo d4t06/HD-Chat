@@ -1,11 +1,11 @@
 import PopupWrapper from "./ui/PopupWrapper";
-import { ArrowLeftStartOnRectangleIcon, BellSlashIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { BellSlashIcon, MinusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import Modal from "./Modal";
 import ConfirmModal from "./Modal/ConfirmModal";
 import MenuItem from "./ui/MenuItem";
 
-export default function ConversationMenu() {
+export default function ConversationItemMenu() {
    const [openModal, setOpenModal] = useState(false);
 
    // hooks
@@ -20,16 +20,16 @@ export default function ConversationMenu() {
       <>
          <PopupWrapper variant={"thin"}>
             <MenuItem cb={() => setOpenModal(true)}>
-               <PlusIcon className={classes.icon} />
-               Add memeber
+               <TrashIcon className={classes.icon} />
+               Delete conversation
             </MenuItem>
             <MenuItem cb={() => setOpenModal(true)}>
                <BellSlashIcon className={classes.icon} />
                Mute
             </MenuItem>
             <MenuItem cb={() => setOpenModal(true)}>
-               <ArrowLeftStartOnRectangleIcon className={classes.icon} />
-               Left
+               <MinusIcon className={classes.icon} />
+               Block
             </MenuItem>
          </PopupWrapper>
 

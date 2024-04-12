@@ -1,5 +1,5 @@
 import AccountItem from "@/components/AccountItem";
-import ConversationList from "@/components/ConversationList";
+import SidebarConversationList from "@/components/SidebarConversationList";
 import SearchNotFound from "@/components/SearchNotFound";
 import useGetUserConversation from "@/hooks/useGetUserConversations";
 import { AuthType } from "@/stores/AuthContext";
@@ -10,6 +10,7 @@ import {
 } from "@/stores/CurrentConversationSlice";
 import { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { seenMessages } from "@/stores/ConversationSlice";
 
 type Props = {
    auth: AuthType;
@@ -26,7 +27,7 @@ export default function SidebarConversations({ auth, isSearch, searchResult }: P
 
    type Default = {
       type: "default";
-      conversation: Conversation;
+      cDetail: ConversationDetail;
    };
 
    type NewConversation = {
@@ -37,18 +38,31 @@ export default function SidebarConversations({ auth, isSearch, searchResult }: P
    const handleActiveConversation = (props: Default | NewConversation) => {
       switch (props.type) {
          case "default":
-            if (currentConversationInStore?.id === props.conversation.id) return;
+            if (
+               currentConversationInStore?.conversation.id ===
+               props.cDetail.conversation.id
+            )
+               return;
+
+            const {
+               cDetail: { conversation, name, recipient, countNewMessages },
+            } = props;
+
+            if (!!countNewMessages) dispatch(seenMessages({conversation_id: conversation.id}))
+
             dispatch(
                storingConversation({
-                  currentConversationInStore: props.conversation,
+                  currentConversationInStore: {
+                     conversation: conversation,
+                     name,
+                     recipient,
+                  },
                   tempUser: null,
                })
             );
 
             break;
          case "new":
-            console.log("check in store", tempUser);
-
             if (tempUser?.id === props.user.id) return;
             dispatch(
                storingMessages({
@@ -87,24 +101,22 @@ export default function SidebarConversations({ auth, isSearch, searchResult }: P
    const renderConversations = () => {
       if (isSearch) {
          if (searchResult) {
-            const existingConversation = conversationDetails.filter((c) =>
+            const existingCDetail = conversationDetails.filter((c) =>
                c.conversation.members.find(
                   (m) => m.user_id !== auth.id && m.user_id === searchResult.id
                )
             );
 
-            if (existingConversation.length)
+            if (existingCDetail.length)
                return (
-                  <ConversationList
+                  <SidebarConversationList
                      cb={(c) =>
                         handleActiveConversation({
                            type: "default",
-                           conversation: c,
+                           cDetail: c,
                         })
                      }
-                     tempConversations={[]}
-                     conversations={existingConversation}
-                     auth={auth}
+                     cDetails={existingCDetail}
                   />
                );
 
@@ -140,14 +152,18 @@ export default function SidebarConversations({ auth, isSearch, searchResult }: P
          return <SearchNotFound />;
       }
 
-      return (
-         <ConversationList
-            auth={auth}
-            conversations={conversations}
-            cb={(c) => handleActiveConversation({ type: "default", conversation: c })}
+      if (!!conversationDetails.length) 
+        return <SidebarConversationList
+            cDetails={conversationDetails}
+            cb={(c) => handleActiveConversation({ type: "default", cDetail: c })}
          />
-      );
+      
+         return <p className="text-center">...</p>
    };
+
+
+   console.log('check conversations', conversationDetails);
+   
 
    return (
       <div className={classes.conversationList}>

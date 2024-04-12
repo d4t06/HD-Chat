@@ -1,12 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import useMessageActions from "./useMessageActions";
 import { useDispatch, useSelector } from "react-redux";
 import {
    selectCurrentConversation,
+   setMessageStatus,
    storingMessages,
 } from "@/stores/CurrentConversationSlice";
 
 export default function useCurrentConversationMessage() {
+   const isNewConversation = useRef(false);
+
    // hooks
    const dispatch = useDispatch();
    const { currentConversationInStore, tempUser, messageStatus } = useSelector(
@@ -17,21 +20,24 @@ export default function useCurrentConversationMessage() {
    const handleInitConversation = async () => {
       try {
          // if no conversation in store
-         if (!currentConversationInStore)
+         if (!currentConversationInStore || isNewConversation.current) {
+            isNewConversation.current = false;
+
             return dispatch(
-               storingMessages({
+               setMessageStatus({
                   messageStatus: "successful",
                })
             );
+         }
 
          dispatch(
-            storingMessages({
+            setMessageStatus({
                messageStatus: "loading",
             })
          );
 
          const messages = await getCurrentConversationMessages(
-            currentConversationInStore.id
+            currentConversationInStore.conversation.id
          );
 
          if (!messages) throw new Error("Messages is undefined");
@@ -46,17 +52,20 @@ export default function useCurrentConversationMessage() {
       } catch (error) {
          console.log({ message: error });
          dispatch(
-            storingMessages({
+            setMessageStatus({
                messageStatus: "error",
             })
          );
       }
    };
 
-   // problem after send new message to new user auto set status = loading
    useEffect(() => {
       handleInitConversation();
    }, [currentConversationInStore]);
+
+   useEffect(() => {
+      if (tempUser) isNewConversation.current = true;
+   }, [tempUser]);
 
    return { currentConversationInStore, tempUser, messageStatus };
 }

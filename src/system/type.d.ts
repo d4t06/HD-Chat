@@ -19,7 +19,7 @@ type ImageSchema = Omit<ImageType, "id">;
 type User = {
    id: number;
    fullName: string;
-   last_seen: Date;
+   last_seen: string;
 };
 
 type Member = {
@@ -44,16 +44,21 @@ type ConversationDetail = {
    newMessage: Message | null;
    countNewMessages: number;
    name: string;
+   recipient: User | null;
 };
 
 type ConversationSchema = Omit<Conversation, "id" | "members"> & {};
 
-type NewConversation = {};
+
+type NewConversationPayload = {
+   conversation: Conversation,
+   message: Message
+}
 
 type Message = {
    id: number;
    content: string;
-   type: "text" | "image" | "emoji" | "system-log";
+   type: "text" | "image" | "emoji" | "system-log" | "sticker";
    status: "sending" | "sent" | "received" | "seen";
    from_user_id: number;
    conversation_id: number;
@@ -62,8 +67,10 @@ type Message = {
 
 type MessageSchema = Omit<Message, "id" | "send_at" | "from_user">;
 
+type MessageSchemaNoConversation = Omit<MessageSchema, "conversation_id">;
+
+
 type StompMessage = {
    message: Message;
    to_user_ids: number[];
 };
-
