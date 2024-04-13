@@ -19,6 +19,7 @@ const useRefreshToken = () => {
             fullName: data.userInfo.fullName,
             id: data.userInfo.id,
             token: data.token,
+            last_seen: "",
          });
 
          return data.token;

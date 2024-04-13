@@ -1,6 +1,7 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { AuthType } from "./AuthContext";
 import { conversationDetailFactory } from "@/utils/appHelper";
+import { CurrentConversation } from "./CurrentConversationSlice";
 
 type StateType = {
    conversationDetails: ConversationDetail[];
@@ -67,6 +68,37 @@ const conversationSlice = createSlice({
          state.conversationDetails.unshift(action.payload.conversationDetail);
       },
 
+      updateConversation: (
+         state: StateType,
+         action: PayloadAction<{
+            cDetail: ConversationDetail;
+         }>
+      ) => {
+         const { cDetail } = action.payload;
+
+         const targetCDetail = state.conversationDetails.find(
+            (_cDetail) => _cDetail.conversation.id === cDetail.conversation.id
+         );
+
+         if (targetCDetail === undefined) {
+            console.log("target conversation not found");
+            return state;
+         }
+
+         Object.assign(targetCDetail, cDetail);
+
+         // cDetails.forEach((cDetail) => {
+         //    if (cDetail.recipient === null) {
+         //       console.log("recipient  not found");
+         //       return state;
+         //    }
+
+         //    targetCDetail.conversation.members.push(cDetail.recipient);
+         //    targetCDetail.name = targetCDetail.name + ", " + cDetail.name;
+         // });
+
+         // targetCDetail.recipient = null;
+      },
       addMessage(
          state: StateType,
          action: PayloadAction<{
@@ -115,6 +147,7 @@ const {
    seenMessages,
    setConversationStatus,
    addNewConversation,
+   updateConversation
 } = conversationSlice.actions;
 
 export const selectAllConversations = (state: { conversations: StateType }) => {
@@ -129,6 +162,7 @@ export {
    seenMessages,
    setConversationStatus,
    addNewConversation,
+   updateConversation
 };
 
 export default conversationSlice.reducer;

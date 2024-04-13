@@ -7,12 +7,14 @@ type MessageType = {
    messages: Message[];
 };
 
+export type CurrentConversation = {
+   conversation: Conversation;
+   name: string;
+   recipient: Member | null;
+};
+
 type ConversationType = {
-   currentConversationInStore: {
-      conversation: Conversation;
-      name: string;
-      recipient: User | null;
-   } | null;
+   currentConversationInStore: CurrentConversation | null;
    tempUser: User | null;
 };
 
@@ -37,13 +39,27 @@ const currentConversationSlice = createSlice({
    name: "currentConversation",
    initialState: initState,
    reducers: {
-      storingConversation: (
+      storingCurrentConversation: (
          state: StateType,
-         action: PayloadAction<ConversationType>
+         action: PayloadAction<{
+            conversationDetail: ConversationDetail | null;
+            tempUser: User | null;
+         }>
       ) => {
-         const payload = action.payload;
-         state.currentConversationInStore = payload.currentConversationInStore || null;
-         state.tempUser = payload.tempUser || null;
+         const { conversationDetail, tempUser } = action.payload;
+
+         if (!conversationDetail) {
+            state.currentConversationInStore = null;
+         } else {
+            const newCurrentConversation: CurrentConversation = {
+               conversation: conversationDetail.conversation,
+               name: conversationDetail.name,
+               recipient: conversationDetail.recipient,
+            };
+
+            state.currentConversationInStore = newCurrentConversation;
+         }
+         state.tempUser = tempUser || null;
       },
       setMessageStatus: (
          state: StateType,
@@ -80,9 +96,7 @@ const currentConversationSlice = createSlice({
       },
 
       spliceTempImage: (state: StateType, _action: PayloadAction) => {
-
-         console.log('check statse', current(state.tempImageMessages));
-         
+         console.log("check statse", current(state.tempImageMessages));
 
          state.tempImageMessages.pop();
       },
@@ -98,7 +112,7 @@ export const selectCurrentConversation = (state: { currentConversation: StateTyp
 };
 
 const {
-   storingConversation,
+   storingCurrentConversation,
    reset,
    storingMessages,
    storingTempImages,
@@ -108,7 +122,7 @@ const {
 
 export {
    reset,
-   storingConversation,
+   storingCurrentConversation,
    storingMessages,
    storingTempImages,
    setMessageStatus,

@@ -1,16 +1,19 @@
 import PopupWrapper from "./ui/PopupWrapper";
-import { ArrowLeftStartOnRectangleIcon, BellSlashIcon, PlusIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
-import Modal from "./Modal";
-import ConfirmModal from "./Modal/ConfirmModal";
+import {
+   ArrowLeftStartOnRectangleIcon,
+   BellSlashIcon,
+   PlusIcon,
+} from "@heroicons/react/24/outline";
+import { Dispatch, SetStateAction } from "react";
 import MenuItem from "./ui/MenuItem";
+import { ChatScreenMenuModal } from "./ChatScreenHeader";
 
-export default function ConversationMenu() {
-   const [openModal, setOpenModal] = useState(false);
+type Props = {
+   setOpenModal: Dispatch<SetStateAction<ChatScreenMenuModal>>;
+};
 
+export default function ConversationMenu({ setOpenModal }: Props) {
    // hooks
-
-   const closeModal = () => setOpenModal(false);
 
    const classes = {
       icon: "w-[22px] mr-[5px]",
@@ -19,25 +22,25 @@ export default function ConversationMenu() {
    return (
       <>
          <PopupWrapper variant={"thin"}>
-            <MenuItem cb={() => setOpenModal(true)}>
+            <MenuItem cb={() => setOpenModal("add-member")}>
                <PlusIcon className={classes.icon} />
-               Add memeber
+               Add member
             </MenuItem>
-            <MenuItem cb={() => setOpenModal(true)}>
+            <MenuItem cb={() => {}}>
                <BellSlashIcon className={classes.icon} />
                Mute
             </MenuItem>
-            <MenuItem cb={() => setOpenModal(true)}>
+            <MenuItem cb={() => {}}>
                <ArrowLeftStartOnRectangleIcon className={classes.icon} />
                Left
             </MenuItem>
          </PopupWrapper>
 
-         {openModal && (
+         {/* {openModal && (
             <Modal close={closeModal}>
                <ConfirmModal callback={() => {}} close={closeModal} loading={false} />
             </Modal>
-         )}
+         )} */}
       </>
    );
 }

@@ -44,7 +44,7 @@ type ConversationDetail = {
    newMessage: Message | null;
    countNewMessages: number;
    name: string;
-   recipient: User | null;
+   recipient: Member | null;
 };
 
 type ConversationSchema = Omit<Conversation, "id" | "members"> & {};

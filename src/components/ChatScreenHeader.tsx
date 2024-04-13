@@ -6,8 +6,15 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/Popover";
 import Button from "./ui/Button";
 import ConversationMenu from "./ConversationMenu";
 import { Bars3Icon } from "@heroicons/react/24/outline";
+import Modal from "./Modal";
+import { useMemo, useState } from "react";
+import AddMemberModal from "./Modal/AddMemberModal";
+
+export type ChatScreenMenuModal = "close" | "add-member" | "setting";
 
 export default function ChatScreenHeader() {
+   const [openModal, setOpenModal] = useState<ChatScreenMenuModal>("close");
+
    const classes = {
       button: "p-[4px]",
       container:
@@ -29,38 +36,52 @@ export default function ChatScreenHeader() {
       currentConversationInStore === null
          ? "New conversation"
          : convertDateStringToString(
-              currentConversationInStore.recipient?.last_seen || ""
+              currentConversationInStore.recipient?.user.last_seen || ""
            );
 
-   return (
-      <div
-         className={classes.container}
-      >
-         <AccountItem
-            keepNameInSmall={true}
-            type="default"
-            size="small"
-            fullName={conversationName || ""}
-            desc={desc || ""}
-         />
+   const closeModal = () => setOpenModal("close");
 
-         <div className="flex">
-            <Popover placement="bottom-end">
-               <PopoverTrigger>
-                  <Button
-                     className={classes.button + " ml-[10px]"}
-                     variant={"push"}
-                     size={"clear"}
-                     colors="secondary"
-                  >
-                     <Bars3Icon className="w-[22px]" />
-                  </Button>
-               </PopoverTrigger>
-               <PopoverContent>
-                  <ConversationMenu />
-               </PopoverContent>
-            </Popover>
+   const renderModal = useMemo(() => {
+      if (openModal === "close") return;
+
+      switch (openModal) {
+         case "add-member":
+         case "setting":
+            return <AddMemberModal close={closeModal} />;
+      }
+   }, [openModal]);
+
+   return (
+      <>
+         <div className={classes.container}>
+            <AccountItem
+               keepNameInSmall={true}
+               type="default"
+               size="small"
+               fullName={conversationName || ""}
+               desc={desc || ""}
+            />
+
+            <div className="flex">
+               <Popover placement="bottom-end">
+                  <PopoverTrigger>
+                     <Button
+                        className={classes.button + " ml-[10px]"}
+                        variant={"push"}
+                        size={"clear"}
+                        colors="secondary"
+                     >
+                        <Bars3Icon className="w-[22px]" />
+                     </Button>
+                  </PopoverTrigger>
+                  <PopoverContent>
+                     <ConversationMenu setOpenModal={setOpenModal} />
+                  </PopoverContent>
+               </Popover>
+            </div>
          </div>
-      </div>
+
+         {openModal !== "close" && <Modal close={closeModal}>{renderModal}</Modal>}
+      </>
    );
 }

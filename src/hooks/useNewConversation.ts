@@ -1,14 +1,12 @@
 import {
    selectCurrentConversation,
-   setMessageStatus,
-   storingConversation,
+   storingCurrentConversation,
 } from "@/stores/CurrentConversationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import useMessageActions from "./useMessageActions";
 import useConversationActions from "./useConversationActions";
 import useMemberActions from "./useMemberActions";
 import { useAuth } from "@/stores/AuthContext";
-import { useConversation } from "@/stores/ConversationContext";
 import { conversationDetailFactory } from "@/utils/appHelper";
 import { addConversation } from "@/stores/ConversationSlice";
 
@@ -65,12 +63,8 @@ export default function useSendMessageToNewConversation() {
          dispatch(addConversation({ conversationDetail: cDetail }));
 
          dispatch(
-            storingConversation({
-               currentConversationInStore: {
-                  conversation: c,
-                  name: cDetail.name,
-                  recipient: cDetail.recipient,
-               },
+            storingCurrentConversation({
+               conversationDetail: cDetail,
                tempUser: null,
             })
          );

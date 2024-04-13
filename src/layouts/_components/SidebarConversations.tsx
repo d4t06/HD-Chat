@@ -5,7 +5,7 @@ import useGetUserConversation from "@/hooks/useGetUserConversations";
 import { AuthType } from "@/stores/AuthContext";
 import {
    selectCurrentConversation,
-   storingConversation,
+   storingCurrentConversation,
    storingMessages,
 } from "@/stores/CurrentConversationSlice";
 import { useMemo } from "react";
@@ -44,19 +44,14 @@ export default function SidebarConversations({ auth, isSearch, searchResult }: P
             )
                return;
 
-            const {
-               cDetail: { conversation, name, recipient, countNewMessages },
-            } = props;
+            const { cDetail } = props;
 
-            if (!!countNewMessages) dispatch(seenMessages({conversation_id: conversation.id}))
+            if (!!cDetail.countNewMessages)
+               dispatch(seenMessages({ conversation_id: cDetail.conversation.id }));
 
             dispatch(
-               storingConversation({
-                  currentConversationInStore: {
-                     conversation: conversation,
-                     name,
-                     recipient,
-                  },
+               storingCurrentConversation({
+                  conversationDetail: cDetail,
                   tempUser: null,
                })
             );
@@ -72,8 +67,8 @@ export default function SidebarConversations({ auth, isSearch, searchResult }: P
                })
             );
             dispatch(
-               storingConversation({
-                  currentConversationInStore: null,
+               storingCurrentConversation({
+                  conversationDetail: null,
                   tempUser: props.user,
                })
             );
@@ -152,18 +147,18 @@ export default function SidebarConversations({ auth, isSearch, searchResult }: P
          return <SearchNotFound />;
       }
 
-      if (!!conversationDetails.length) 
-        return <SidebarConversationList
-            cDetails={conversationDetails}
-            cb={(c) => handleActiveConversation({ type: "default", cDetail: c })}
-         />
-      
-         return <p className="text-center">...</p>
+      if (!!conversationDetails.length)
+         return (
+            <SidebarConversationList
+               cDetails={conversationDetails}
+               cb={(c) => handleActiveConversation({ type: "default", cDetail: c })}
+            />
+         );
+
+      return <p className="text-center">...</p>;
    };
 
-
-   console.log('check conversations', conversationDetails);
-   
+   console.log("check conversations", conversationDetails);
 
    return (
       <div className={classes.conversationList}>

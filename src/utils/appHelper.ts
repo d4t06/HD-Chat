@@ -60,15 +60,15 @@ export const messageFactory = (data: Partial<MessageSchema>) => {
 
 
 const getConversationName = (c: Conversation, auth: AuthType) => {
-   let recipient: User;
+   let recipient: Member;
    let name = "";
 
    if (!!c.name) return { name: c.name, recipient: null };
 
    const anotherMembers = c.members.filter((m) => m.user_id != auth.id);
    if (c.members.length === 2) {
-      recipient = anotherMembers[0].user;
-      return { name: recipient.fullName, recipient };
+      recipient = anotherMembers[0];
+      return { name: recipient.user.fullName, recipient };
    }
 
    anotherMembers.forEach((m) => (name += m.user.fullName + ", "));
