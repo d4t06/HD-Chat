@@ -77,7 +77,7 @@ export default function SidebarConversations({ auth, isSearch, searchResult }: P
 
    const classes = {
       conversationList:
-         "absolute top-[60px] sm:top-[130px] bottom-0 left-0 right-0 flex flex-col no-scrollbar overflow-y-auto",
+         "flex-grow sm:top-[130px] w-full flex flex-col no-scrollbar overflow-y-auto",
       container: "relative w-[70px] sm:w-[360px] flex-shrink-0 border-r h-screen",
       activeConversation: "!bg-[#c2e7ff]",
       conversationItem: "hover:bg-[#f3f3f5] p-2 sm:px-4 w-full",
@@ -158,7 +158,7 @@ export default function SidebarConversations({ auth, isSearch, searchResult }: P
       return <p className="text-center">...</p>;
    };
 
-   console.log("check conversations", conversationDetails);
+   // console.log("check conversations", conversationDetails);
 
    return (
       <div className={classes.conversationList}>

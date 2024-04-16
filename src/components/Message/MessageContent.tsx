@@ -2,6 +2,7 @@ import { generateHSL } from "@/utils/getUniqueColor";
 import EmojiMessage from "./EmojiMessage";
 import ImageMessage from "./ImageMessage";
 import StickerMessage from "./StickerMessage";
+import { convertDateStringToString } from "@/utils/appHelper";
 
 type Props = {
    message: Message;
@@ -58,13 +59,17 @@ export default function MessageContent({ message, self, userFullName }: Props) {
                      style={{ color }}
                      className="text-[14px] mb-[4px] px-[8px] bg-[#f3f3f5] rounded-[99px]"
                   >
-                     {userFullName} 
+                     {userFullName}
                   </span>
-               )} 
+               )}
                {content()}
             </div>
          );
       case "system-log":
-         return <p className="text-center text-[#808080]">{message.content}</p>;
+         return (
+            <p className="text-center text-[#808080] text-[14px]">
+               {message.content} - {convertDateStringToString(message.send_at)}
+            </p>
+         );
    }
 }

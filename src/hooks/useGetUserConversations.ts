@@ -29,7 +29,7 @@ export default function useGetUserConversation() {
          // setStatus("loading");
          dispatch(setConversationStatus({ status: "loading" }));
 
-         await sleep(2000);
+         await sleep(1000);
          const conversations = await getAllUserConversations(auth.id);
          if (conversations) {
             // setConversations(conversations);

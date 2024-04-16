@@ -1,13 +1,12 @@
 import { useAuth } from "@/stores/AuthContext";
-import { useConversation } from "@/stores/ConversationContext";
-import { reset } from "@/stores/CurrentConversationSlice";
+import { resetConversations } from "@/stores/ConversationSlice";
+import { resetCurrentConversation } from "@/stores/CurrentConversationSlice";
 import axios from "axios";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 
 export default function useLogout() {
    const [isFetching, setIsFetching] = useState(false);
-   const { setConversations } = useConversation();
 
    const { setAuth } = useAuth();
    const dispatch = useDispatch();
@@ -22,8 +21,8 @@ export default function useLogout() {
          console.log({ message: error });
       } finally {
          setIsFetching(false);
-         dispatch(reset());
-         setConversations([]);
+         dispatch(resetCurrentConversation());
+         dispatch(resetConversations());
 
          setAuth(null);
       }

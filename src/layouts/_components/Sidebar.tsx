@@ -13,7 +13,7 @@ export default function Sidebar() {
 
    const classes = {
       container:
-         "relative w-[70px] sm:w-[360px] flex-shrink-0 border-r border-black/10 h-screen",
+         "flex flex-col relative w-[70px] sm:w-[360px] flex-shrink-0 border-r border-black/10 h-screen",
    };
 
    if (!auth) return;
@@ -21,7 +21,7 @@ export default function Sidebar() {
    return (
       <>
          <div className={classes.container}>
-            <div className="p-2 sm:p-4">
+            <div className="p-2 sm:px-4">
                <SidebarHeader />
 
                <div className="mt-[16px] hidden sm:block">

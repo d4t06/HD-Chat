@@ -27,7 +27,7 @@ export default function SidebarConversationList({ cb, cDetails }: Props) {
 
    return (
       <>
-         <h5 className="pl-4 hidden sm:block">Your conversations</h5>
+         <h5 className="pl-4 hidden sm:block pb-[6px]">Your conversations</h5>
          {mapContent}
       </>
    );

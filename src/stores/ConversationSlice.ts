@@ -85,18 +85,6 @@ const conversationSlice = createSlice({
          }
 
          Object.assign(targetCDetail, cDetail);
-
-         // cDetails.forEach((cDetail) => {
-         //    if (cDetail.recipient === null) {
-         //       console.log("recipient  not found");
-         //       return state;
-         //    }
-
-         //    targetCDetail.conversation.members.push(cDetail.recipient);
-         //    targetCDetail.name = targetCDetail.name + ", " + cDetail.name;
-         // });
-
-         // targetCDetail.recipient = null;
       },
       addMessage(
          state: StateType,
@@ -132,7 +120,7 @@ const conversationSlice = createSlice({
          target.newMessage = null;
          target.countNewMessages = 0;
       },
-      reset: (_state: StateType) => {
+      resetConversations: (_state: StateType) => {
          return initialState;
       },
    },
@@ -142,7 +130,7 @@ const {
    addConversation,
    addMessage,
    initConversationDetail,
-   reset,
+   resetConversations,
    seenMessages,
    setConversationStatus,
    addNewConversation,
@@ -157,7 +145,7 @@ export {
    addConversation,
    addMessage,
    initConversationDetail,
-   reset,
+   resetConversations,
    seenMessages,
    setConversationStatus,
    addNewConversation,

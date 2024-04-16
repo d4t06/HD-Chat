@@ -1,27 +1,28 @@
 import { selectAllConversations } from "@/stores/ConversationSlice";
-import { selectCurrentConversation } from "@/stores/CurrentConversationSlice";
 import { Dispatch, SetStateAction, useState } from "react";
 import { useSelector } from "react-redux";
 import AccountItem from "../AccountItem";
 
-type Props = {
+type AddMember = {
+   type: "add-member";
    setSelectCDetails: Dispatch<SetStateAction<ConversationDetail[]>>;
-   type: "add-member" | "create-group";
+   existingMembers: Member[];
 };
 
-export default function SelectConversationList({ setSelectCDetails, type }: Props) {
+type CreateGroup = {
+   type: "create-group";
+   setSelectCDetails: Dispatch<SetStateAction<ConversationDetail[]>>;
+};
+
+type Props = AddMember | CreateGroup;
+
+export default function SelectConversationList({ setSelectCDetails, ...props }: Props) {
    const [_selectCDetails, _setSelectCDetails] = useState<ConversationDetail[]>([]);
 
    const { conversationDetails } = useSelector(selectAllConversations);
-   const { currentConversationInStore } = useSelector(selectCurrentConversation);
 
    const twoMemberConversationDetails = conversationDetails.filter((cDetail) => {
-      if (type === "create-group") return !!cDetail.recipient;
-      if (type === "add-member")
-         return (
-            !!cDetail.recipient &&
-            currentConversationInStore?.recipient !== cDetail.recipient
-         );
+      return !!cDetail.recipient;
    });
 
    const handleToggleConversation = (target: ConversationDetail) => {
@@ -45,16 +46,26 @@ export default function SelectConversationList({ setSelectCDetails, type }: Prop
    };
 
    const mapContent = twoMemberConversationDetails.map((cDetail, index) => {
+      if (cDetail.recipient === null) return <p>data error</p>;
+
       const active = !!_selectCDetails.find(
          (_cDetail) => _cDetail.conversation.id === cDetail.conversation.id
       );
+
+      const isDisable =
+         props.type === "create-group"
+            ? false
+            : !!props.existingMembers.find(
+                 (m) => m.user_id === (cDetail.recipient as Member).user_id
+              );
 
       return (
          <div
             onClick={() => handleToggleConversation(cDetail)}
             key={index}
             className={`${classes.conversationItem} 
-              ${active ? classes.active : ""}`}
+              ${active ? classes.active : ""}
+              ${isDisable ? `${classes.active} disable` : ""}`}
          >
             <AccountItem
                bubble={cDetail.countNewMessages}

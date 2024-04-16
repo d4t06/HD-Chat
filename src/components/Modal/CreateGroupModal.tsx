@@ -27,7 +27,7 @@ export default function CreateGroupModal({ close }: Props) {
    const { addMember } = useMemberActions();
    const { sendMessage } = useMessageActions();
 
-   const ableToSubmit = !!groupName && selectCDetails.length <= 3;
+   const ableToSubmit = selectCDetails.length >= 3;
 
    const handleAddGroup = async () => {
       try {
@@ -100,16 +100,13 @@ export default function CreateGroupModal({ close }: Props) {
 
          // no send to others
          const newMessage = await sendMessage(
-            { message: firstMessage, toUserIds },
+            { message: firstMessage, toUserIds: [] },
             { sendMessage: false }
          );
 
          if (!newMessage) throw new Error("new message not found");
 
-         console.log("check payload", c);
-         console.log("check payload", newMessage);
-         console.log("check payload", toUserIds);
-
+         // no new conversation and message to new member
          sendConversation({
             conversation: c,
             message: newMessage,
@@ -126,9 +123,9 @@ export default function CreateGroupModal({ close }: Props) {
    return (
       <div className="flex flex-col w-[700px] max-w-[80vw] min-h-[300px] h-[500px] max-h-[80vh]">
          <ModalHeader close={close} title="Create group" />
-         <div className="flex-grow flex flex-col">
+         <div className="flex-grow flex flex-col overflow-hidden">
             <MyInput
-               className="h-[36px] px-[16px] rounded-[99px]"
+               className="h-[36px] px-[16px] rounded-[99px] flex-shrink-0"
                cb={(value) => setGroupName(value)}
                placeholder="Group name..."
             />
@@ -141,7 +138,7 @@ export default function CreateGroupModal({ close }: Props) {
                   setSelectCDetails={setSelectCDetails}
                />
             </div>
-            <div className="flex justify-center">
+            <div className="flex justify-center py-[4px]">
                <Button
                   onClick={handleAddGroup}
                   disabled={!ableToSubmit}

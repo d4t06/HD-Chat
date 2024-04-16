@@ -1,7 +1,7 @@
-import { Bars3Icon } from "@heroicons/react/24/outline";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/Popover";
-import ConversationMenu from "./ConversationItemMenu";
-import { useMemo, useState } from "react";
+// import { Bars3Icon } from "@heroicons/react/24/outline";
+// import { Popover, PopoverContent, PopoverTrigger } from "./ui/Popover";
+// import ConversationMenu from "./ConversationItemMenu";
+import { useMemo } from "react";
 import AccountItem from "./AccountItem";
 
 type Props = {
@@ -17,7 +17,7 @@ export default function SidebarConversationItem({ cDetail, cb, active }: Props) 
          "absolute right-4 top-[50%] translate-y-[-50%] hidden sm:group-hover:block",
    };
 
-   const [isOpenMenu, setIsOpenMenu] = useState(false);
+   // const [isOpenMenu, setIsOpenMenu] = useState(false);
 
    const desc = useMemo(() => {
       if (!cDetail.newMessage) return "";
@@ -49,7 +49,7 @@ export default function SidebarConversationItem({ cDetail, cb, active }: Props) 
                fullName={cDetail.name}
             />
          </div>
-         <Popover
+         {/* <Popover
             isOpenFromParent={isOpenMenu}
             setIsOpenFromParent={setIsOpenMenu}
             placement="bottom"
@@ -61,7 +61,7 @@ export default function SidebarConversationItem({ cDetail, cb, active }: Props) 
             </PopoverTrigger>
 
             <PopoverContent>{isOpenMenu && <ConversationMenu />}</PopoverContent>
-         </Popover>
+         </Popover> */}
       </div>
    );
 }

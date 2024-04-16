@@ -40,7 +40,7 @@ export default function ChatScreenHeader() {
          return convertDateStringToString(
             currentConversationInStore.recipient.user.last_seen || ""
          );
-      } else return `${currentConversationInStore.conversation.members.length} members`
+      } else return `${currentConversationInStore.conversation.members.length} members`;
    }, [currentConversationInStore]);
 
    const closeModal = () => setOpenModal("close");
@@ -67,21 +67,26 @@ export default function ChatScreenHeader() {
             />
 
             <div className="flex">
-               <Popover placement="bottom-end">
-                  <PopoverTrigger>
-                     <Button
-                        className={classes.button + " ml-[10px]"}
-                        variant={"push"}
-                        size={"clear"}
-                        colors="secondary"
-                     >
-                        <Bars3Icon className="w-[22px]" />
-                     </Button>
-                  </PopoverTrigger>
-                  <PopoverContent>
-                     <ConversationMenu setOpenModal={setOpenModal} />
-                  </PopoverContent>
-               </Popover>           
+               {currentConversationInStore && (
+                  <Popover placement="bottom-end">
+                     <PopoverTrigger>
+                        <Button
+                           className={classes.button + " ml-[10px]"}
+                           variant={"push"}
+                           size={"clear"}
+                           colors="secondary"
+                        >
+                           <Bars3Icon className="w-[22px]" />
+                        </Button>
+                     </PopoverTrigger>
+                     <PopoverContent>
+                        <ConversationMenu
+                           currentConversation={currentConversationInStore}
+                           setOpenModal={setOpenModal}
+                        />
+                     </PopoverContent>
+                  </Popover>
+               )}
             </div>
          </div>
 

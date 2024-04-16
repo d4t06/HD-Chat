@@ -19,7 +19,7 @@ import PreviewImageList from "./PreviewImagesList";
 import { PaperAirplaneIcon } from "@heroicons/react/16/solid";
 import { emojis } from "@/assets/emoji";
 import { stickers } from "@/assets/sticker";
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
+// import { ArrowPathIcon } from "@heroicons/react/24/outline";
 // import useMemberActions from "@/hooks/useMemberActions";
 
 type Props = {
@@ -29,7 +29,7 @@ type Props = {
 export default function ChatInput({ lastMessageRef }: Props) {
    const [message, setMessage] = useState("");
    const imageInputRef = useRef<ElementRef<"input">>(null);
-   const [isFetching, setIsFetching] = useState(false);
+   // const [isFetching, setIsFetching] = useState(false);
 
    //hooks
    const { auth } = useAuth();
@@ -50,7 +50,7 @@ export default function ChatInput({ lastMessageRef }: Props) {
 
          let messageSchemaNoConversation: MessageSchemaNoConversation | null = null;
 
-         setIsFetching(true);
+         // setIsFetching(true);
 
          // init message obj
          switch (type) {
@@ -89,14 +89,6 @@ export default function ChatInput({ lastMessageRef }: Props) {
                };
          }
 
-         if (!messageSchemaNoConversation) throw new Error("message schema not found");
-
-         // if new conversation
-         if (!currentConversationInStore) {
-            await sendMessageToNewConversation(messageSchemaNoConversation);
-            return;
-         }
-
          // send message
          switch (type) {
             case "image":
@@ -104,12 +96,21 @@ export default function ChatInput({ lastMessageRef }: Props) {
                if (!inputEle) return;
 
                await handleSendImage(imageInputRef.current);
-
                break;
+
             case "text":
             case "emoji":
             case "system-log":
             case "sticker":
+               if (!messageSchemaNoConversation)
+                  throw new Error("message schema not found");
+
+               // if new conversation
+               if (!currentConversationInStore) {
+                  await sendMessageToNewConversation(messageSchemaNoConversation);
+                  return;
+               }
+
                const messageSchema: MessageSchema = {
                   ...messageSchemaNoConversation,
                   conversation_id: currentConversationInStore.conversation.id,
@@ -125,7 +126,7 @@ export default function ChatInput({ lastMessageRef }: Props) {
          console.log({ message: error });
       } finally {
          clear();
-         setIsFetching(false);
+         // setIsFetching(false);
 
          lastMessageRef.current?.scrollIntoView({
             behavior: "smooth",
@@ -135,7 +136,7 @@ export default function ChatInput({ lastMessageRef }: Props) {
    };
 
    const handleKeyUp = (e: KeyboardEvent) => {
-      if (isFetching) return;
+      // if (isFetching) return;
       if (e.code === "Enter") {
          handleSendMessage("text");
       }
@@ -155,7 +156,6 @@ export default function ChatInput({ lastMessageRef }: Props) {
             size={"clear"}
             colors="secondary"
             onClick={onClick}
-            disabled={isFetching}
          >
             {children}
          </Button>
@@ -163,12 +163,12 @@ export default function ChatInput({ lastMessageRef }: Props) {
    };
 
    const renderSendButton = useMemo(() => {
-      if (isFetching)
-         return (
-            <SendButton onClick={() => {}}>
-               <ArrowPathIcon className="w-[20px] animate-spin text-[#cd1818]" />
-            </SendButton>
-         );
+      // if (isFetching)
+      //    return (
+      //       <SendButton onClick={() => {}}>
+      //          <ArrowPathIcon className="w-[20px] animate-spin text-[#cd1818]" />
+      //       </SendButton>
+      //    );
       if (tempImages.length)
          return (
             <SendButton onClick={() => handleSendMessage("image")}>
@@ -187,7 +187,7 @@ export default function ChatInput({ lastMessageRef }: Props) {
          <SendButton onClick={() => handleSendMessage("emoji")}>
             <svg height="28px" viewBox="0 0 36 36" width="28px">
                <path
-                  clip-rule="evenodd"
+                  clipRule="evenodd"
                   d="M18 29c6.075 0 11-4.925 11-11S24.075 7 18 7 7 11.925 7 18s4.925 11 11 11zm-5.25-13c0-1.25.563-2 1.5-2 .938 0 1.5.75 1.5 2s-.563 2-1.5 2c-.938 0-1.5-.75-1.5-2zm7.5 0c0-1.25.563-2 1.5-2 .938 0 1.5.75 1.5 2s-.563 2-1.5 2c-.938 0-1.5-.75-1.5-2zm-7.52 5.464a1 1 0 011.41-.12 5.963 5.963 0 003.856 1.406c1.47 0 2.813-.528 3.856-1.406a1 1 0 111.288 1.53 7.962 7.962 0 01-5.144 1.876 7.962 7.962 0 01-5.144-1.877 1 1 0 01-.121-1.409z"
                   fill="#cd1818"
                   fillRule="evenodd"
@@ -195,7 +195,7 @@ export default function ChatInput({ lastMessageRef }: Props) {
             </svg>
          </SendButton>
       );
-   }, [message, tempImages, isFetching]);
+   }, [message, tempImages]);
 
    const classes = {
       container: "flex p-2 sm:p-4 border-t",

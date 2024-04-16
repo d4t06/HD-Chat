@@ -96,12 +96,30 @@ const currentConversationSlice = createSlice({
       },
 
       spliceTempImage: (state: StateType, _action: PayloadAction) => {
-         console.log("check statse", current(state.tempImageMessages));
+         state.tempImageMessages.shift();
 
-         state.tempImageMessages.pop();
+         console.log("check state", current(state.tempImageMessages));
       },
 
-      reset: (_state, _action: PayloadAction<undefined>) => {
+      updateSendingImageMessage: (
+         state: StateType,
+         action: PayloadAction<{
+            messageID: number;
+            newMessage: Message;
+         }>
+      ) => {
+         const { messageID, newMessage } = action.payload;
+
+         const targetMessage = state.messages.find((m) => m.id === messageID);
+         if (!targetMessage) {
+            console.log("target message not found");
+            return state;
+         }
+
+         Object.assign(targetMessage, newMessage);
+      },
+
+      resetCurrentConversation: (_state, _action: PayloadAction<undefined>) => {
          return initState;
       },
    },
@@ -113,19 +131,21 @@ export const selectCurrentConversation = (state: { currentConversation: StateTyp
 
 const {
    storingCurrentConversation,
-   reset,
+   resetCurrentConversation,
    storingMessages,
    storingTempImages,
    setMessageStatus,
    spliceTempImage,
+   updateSendingImageMessage,
 } = currentConversationSlice.actions;
 
 export {
-   reset,
+   resetCurrentConversation,
    storingCurrentConversation,
    storingMessages,
    storingTempImages,
    setMessageStatus,
+   updateSendingImageMessage,
    spliceTempImage,
 };
 

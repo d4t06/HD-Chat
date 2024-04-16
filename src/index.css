@@ -16,3 +16,8 @@ body {
    -ms-overflow-style: none; /* IE and Edge */
    scrollbar-width: none; /* Firefox */
 }
+
+.disable {
+   pointer-events: none;
+   opacity: .6;
+}

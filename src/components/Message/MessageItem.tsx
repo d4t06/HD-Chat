@@ -3,6 +3,7 @@ import AvatarPlaceholder from "../Avatar";
 import { Bars3Icon, FaceSmileIcon } from "@heroicons/react/24/outline";
 import MessageContent from "./MessageContent";
 import ImageMessage from "./ImageMessage";
+import { convertDateStringToString } from "@/utils/appHelper";
 
 type OtherMessage = {
    type: "other";
@@ -84,12 +85,37 @@ function MessageItem(
       switch (props.type) {
          case "other":
             return (
-               <div className={`${classes.messageContainer} ${props.className || ""}`}>
-                  <div className="max-w-[500px]">{messageContent}</div>
-                  {messageCta}
-               </div>
+               <>
+                  {props.isNewSection && (
+                     <p className="text-[14px] text-[#808080] text-center">
+                        {convertDateStringToString(props.message.send_at)}
+                     </p>
+                  )}
+                  <div className={`${classes.messageContainer} ${props.className || ""}`}>
+                     <div className="max-w-[500px]">{messageContent}</div>
+                     {messageCta}
+                  </div>
+               </>
             );
          case "self":
+            return (
+               <>
+                  {props.isNewSection && (
+                     <p className="text-[14px] text-[#808080] text-center">
+                        {convertDateStringToString(props.message.send_at)}
+                     </p>
+                  )}
+
+                  <div
+                     className={`${
+                        classes.messageContainer
+                     } flex-row-reverse justify-start  ${props.className || ""}`}
+                  >
+                     <div className="max-w-[100px]">{messageContent}</div>
+                     {messageCta}
+                  </div>
+               </>
+            );
          case "temp-image":
             return (
                <div
@@ -97,7 +123,7 @@ function MessageItem(
                      classes.messageContainer
                   } flex-row-reverse justify-start  ${props.className || ""}`}
                >
-                  <div className="max-w-[500px]">{messageContent}</div>
+                  <div className="max-w-[100px]">{messageContent}</div>
                   {messageCta}
                </div>
             );

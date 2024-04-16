@@ -61,7 +61,7 @@ export default function useCurrentConversationMessage() {
 
    useEffect(() => {
       handleInitConversation();
-   }, [currentConversationInStore]);
+   }, [currentConversationInStore?.conversation.id]);
 
    useEffect(() => {
       if (tempUser) isNewConversation.current = true;

@@ -71,7 +71,12 @@ const getConversationName = (c: Conversation, auth: AuthType) => {
       return { name: recipient.user.fullName, recipient };
    }
 
-   anotherMembers.forEach((m) => (name += m.user.fullName + ", "));
+   anotherMembers.forEach((m, index) => {
+
+      if (index + 1 < anotherMembers.length)
+         name = name + m.user.fullName + ", ";
+      else name = name + m.user.fullName;
+   });
 
    return { name, recipient: null };
 };

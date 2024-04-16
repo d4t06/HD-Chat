@@ -1,6 +1,7 @@
 import { VariantProps, cva } from "class-variance-authority";
 import Skeleton from "./Skeleton";
 import { generateHSL } from "@/utils/getUniqueColor";
+import { useMemo } from "react";
 
 const avatarVariant = cva("flex-shrink-0", {
    variants: {
@@ -42,13 +43,21 @@ export default function AvatarPlaceholder({ size, ...props }: Props | LoadingPro
 
       const color = generateHSL(fullName);
 
+
+      const firstChar = useMemo(() => {
+         const index = fullName.lastIndexOf(" ");
+         if (index === -1) return fullName.charAt(0)
+
+         return fullName.substring(index + 1).charAt(0)
+      }, [fullName])
+
       return (
          <div
             className={avatarVariant({ size, className: className || "" + " relative" })}
          >
             {!blank && (
                <div style={{ backgroundColor: color }} className={classes.frame}>
-                  <p className="text-[#fff]">{fullName.charAt(0)}</p>
+                  <p className="text-[#fff]">{firstChar}</p>
                   {active && (
                      <span className="absolute border-[3px] border-white p-[5px] bg-emerald-400 rounded-full bottom-[0px] right-[-2px]"></span>
                   )}

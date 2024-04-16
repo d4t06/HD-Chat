@@ -2,7 +2,8 @@ import { AuthType } from "@/stores/AuthContext";
 import MessageItem from "./Message/MessageItem";
 import { useSelector } from "react-redux";
 import { selectCurrentConversation } from "@/stores/CurrentConversationSlice";
-import { useMemo, useRef } from "react";
+import { useMemo } from "react";
+import { nanoid } from "@reduxjs/toolkit";
 
 type Props = {
    auth: AuthType;
@@ -13,7 +14,7 @@ export default function MessageList({ auth }: Props) {
       selectCurrentConversation
    );
 
-   const from_user_id = useRef<number | null>(null);
+   let from_user_id = 999;
    let isNewSection = false;
 
    const isInGroup = currentConversationInStore
@@ -21,10 +22,13 @@ export default function MessageList({ auth }: Props) {
       : false;
 
    const renderTempsMessage = useMemo(() => {
+      if (!currentConversationInStore) return <></>;
+      
       if (!!tempImageMessages.length) {
-         return tempImageMessages.map((m, index) => (
-            <MessageItem key={index} type="temp-image" message={m} />
-         ));
+         return tempImageMessages.map((m) => {
+            if (m.conversation_id === currentConversationInStore?.conversation.id)
+               return <MessageItem key={nanoid(4)} type="temp-image" message={m} />;
+         });
       }
    }, [tempImageMessages]);
 
@@ -42,10 +46,12 @@ export default function MessageList({ auth }: Props) {
                   />
                );
 
-            if (m.from_user_id !== from_user_id.current) isNewSection = true;
-            else isNewSection = false;
+            // the first message is alway new section
+            if (m.from_user_id !== from_user_id) {
+               isNewSection = true;
+            } else isNewSection = false;
 
-            from_user_id.current = m.from_user_id;
+            from_user_id = m.from_user_id;
 
             const isSelf = m.from_user_id === auth.id;
 

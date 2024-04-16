@@ -53,7 +53,7 @@ export default function AccountItem({
                bubble={bubble}
             />
             <div className={`ml-[10px] ${keepNameInSmall ? "" : "hidden sm:block"}`}>
-               <p className="leading-[20px] font-[500] text-[#1f1f1f]">{fullName}</p>
+               <h5 className="leading-[20px] font-[500] text-[#1f1f1f] line-clamp-1">{fullName}</h5>
                {desc && <p className="font-[500] text-[14px] text-[#808080]">{desc}</p>}
             </div>
          </div>

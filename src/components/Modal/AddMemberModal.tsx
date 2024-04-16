@@ -11,6 +11,7 @@ import useConversationActions from "@/hooks/useConversationActions";
 import { useAuth } from "@/stores/AuthContext";
 import useMessageActions from "@/hooks/useMessageActions";
 import SelectConversationList from "./SelectConversationList";
+import useMemberActions from "@/hooks/useMemberActions";
 type Props = {
    close: () => void;
 };
@@ -27,6 +28,7 @@ export default function AddMemberModal({ close }: Props) {
 
    const { sendConversation } = useConversationActions();
    const { sendMessage } = useMessageActions();
+   const { addMember } = useMemberActions();
 
    const handleAddMemberToConversation = async () => {
       try {
@@ -34,30 +36,57 @@ export default function AddMemberModal({ close }: Props) {
 
          setIsFetching(true);
 
-         const targetCDetail = conversationDetails.find(
+         const newConversationDetails = conversationDetails.slice();
+
+         const currentCDetail = newConversationDetails.find(
             (_cDetail) =>
                _cDetail.conversation.id === currentConversationInStore.conversation.id
          );
 
-         if (targetCDetail === undefined)
+         if (currentCDetail === undefined)
             throw new Error("target conversation not found");
 
-         selectCDetails.forEach((cDetail) => {
-            if (cDetail.recipient === null) throw new Error("recipient  not found");
+         // make copy of conversation detail
+         const newCurrentCDetail = { ...currentCDetail };
+         // make copy of conversation detail conversation
+         const newCurrentCDetailConversation = { ...newCurrentCDetail.conversation };
 
-            targetCDetail.conversation.members.push(cDetail.recipient);
-            targetCDetail.name = targetCDetail.name + ", " + cDetail.name;
-         });
+         const newMembers: Member[] = [...newCurrentCDetailConversation.members];
 
-         targetCDetail.recipient = null;
+         // selectCDetails.forEach((cDetail) => {});
 
-         const toUserIds: number[] = [];
+         for await (const cDetail of selectCDetails) {
+            if (cDetail.recipient === null) throw new Error("recipient not found");
+
+            // cannot push member directly
+            // newCurrentCDetail.conversation.members.push(cDetail.recipient)
+            // push member
+            newMembers.push(cDetail.recipient);
+
+            // api add member to current conversation
+            const newMemberSchema: MemberSchema = {
+               conversation_id: newCurrentCDetailConversation.id,
+               is_owner: false,
+               user_id: cDetail.recipient.user_id,
+            };
+            await addMember(newMemberSchema);
+
+            // add member name if conversation not define specific name
+            // can mutate name directly
+            if (!currentCDetail.conversation.name) {
+               newCurrentCDetail.name = newCurrentCDetail.name + ", " + cDetail.name;
+            }
+         }
+         // update member to copy conversation
+         newCurrentCDetailConversation.members = newMembers;
+
+         // update conversation to copy conversation detail
+         newCurrentCDetail.conversation = newCurrentCDetailConversation;
+
          let content = "";
-         selectCDetails.forEach((cDetail, index) => {
-            if (!cDetail.recipient)
-               throw new Error("invalid recipient when send message");
-            toUserIds.push(cDetail.recipient.user_id);
 
+         selectCDetails.forEach((cDetail, index) => {
+            // if not last index
             if (index + 1 < selectCDetails.length)
                content = content + cDetail.name + ", ";
             else content = content + cDetail.name;
@@ -67,27 +96,29 @@ export default function AddMemberModal({ close }: Props) {
 
          const messageSchema: MessageSchema = {
             content,
-            conversation_id: currentConversationInStore.conversation.id,
+            conversation_id: newCurrentCDetail.conversation.id,
             from_user_id: auth.id,
             status: "seen",
             type: "system-log",
          };
 
-         // only send to current member
+         // only send message to curren members
+         const toUserIDs = newCurrentCDetail.conversation.members.map((m) => m.user_id);
+
          const newMessage = await sendMessage(
-            { message: messageSchema, toUserIds },
+            { message: messageSchema, toUserIds: toUserIDs },
             { sendMessage: false }
          );
 
          if (!newMessage) throw new Error("newMessage error");
 
-         // send conversation with  message to new members
+         // send  current conversation to new members
          selectCDetails.forEach((cDetail) => {
             if (!cDetail.recipient)
                throw new Error("invalid recipient when send message");
 
             sendConversation({
-               conversation: cDetail.conversation,
+               conversation: newCurrentCDetail.conversation,
                message: newMessage,
                toUserIDs: [cDetail.recipient.user_id],
             });
@@ -95,30 +126,37 @@ export default function AddMemberModal({ close }: Props) {
 
          dispatch(
             storingCurrentConversation({
-               conversationDetail: targetCDetail,
+               conversationDetail: newCurrentCDetail,
                tempUser: null,
             })
          );
 
-         dispatch(updateConversation({ cDetail: targetCDetail }));
+         dispatch(updateConversation({ cDetail: newCurrentCDetail }));
       } catch (error) {
          console.log({ message: error });
       } finally {
          setIsFetching(false);
+         close();
       }
    };
 
+   if (!currentConversationInStore) return <></>;
+
    return (
       <div className="flex flex-col w-[700px] max-w-[80vw] h-[500px] max-h-[80vh]">
-         <ModalHeader close={close} title="Add member" />
-         <div className="flex-grow flex flex-col">
+         <ModalHeader
+            close={close}
+            title={`Add member to '${currentConversationInStore?.name}'`}
+         />
+         <div className="flex-grow flex flex-col overflow-hidden">
             <div className="flex-grow overflow-auto">
                <SelectConversationList
                   type="add-member"
                   setSelectCDetails={setSelectCDetails}
+                  existingMembers={currentConversationInStore.conversation.members}
                />
             </div>
-            <div className="flex justify-center">
+            <div className="flex justify-center py-[4px]">
                <Button
                   onClick={handleAddMemberToConversation}
                   disabled={!selectCDetails.length}
