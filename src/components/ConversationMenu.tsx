@@ -35,12 +35,6 @@ export default function ConversationMenu({ setOpenModal }: Props) {
                Left
             </MenuItem>
          </PopupWrapper>
-
-         {/* {openModal && (
-            <Modal close={closeModal}>
-               <ConfirmModal callback={() => {}} close={closeModal} loading={false} />
-            </Modal>
-         )} */}
       </>
    );
 }

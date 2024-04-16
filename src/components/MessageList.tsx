@@ -16,10 +16,12 @@ export default function MessageList({ auth }: Props) {
    const from_user_id = useRef<number | null>(null);
    let isNewSection = false;
 
+   const isInGroup = currentConversationInStore
+      ? currentConversationInStore.conversation.members.length >= 3
+      : false;
+
    const renderTempsMessage = useMemo(() => {
       if (!!tempImageMessages.length) {
-         // const isNewSection = messages[messages.length - 1].id !== auth.id;
-
          return tempImageMessages.map((m, index) => (
             <MessageItem key={index} type="temp-image" message={m} />
          ));
@@ -30,6 +32,16 @@ export default function MessageList({ auth }: Props) {
       () =>
          !!messages.length &&
          messages.map((m, index) => {
+            if (m.type === "system-log")
+               return (
+                  <MessageItem
+                     className={"pt-[20px]"}
+                     key={index}
+                     type="system"
+                     message={m}
+                  />
+               );
+
             if (m.from_user_id !== from_user_id.current) isNewSection = true;
             else isNewSection = false;
 
@@ -60,6 +72,7 @@ export default function MessageList({ auth }: Props) {
                   type="other"
                   user={member.user}
                   message={m}
+                  showName={isInGroup ? isNewSection : false}
                   isNewSection={isNewSection}
                   className={isNewSection ? "pt-[20px]" : ""}
                />

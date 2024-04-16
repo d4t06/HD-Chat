@@ -24,15 +24,15 @@ export default function SidebarConversationItem({ cDetail, cb, active }: Props) 
 
       switch (cDetail.newMessage.type) {
          case "text":
+         case "system-log":
             return cDetail.newMessage.content;
+
          case "image":
             return "Send your an image";
          case "emoji":
             return "Send your an emoji";
          case "sticker":
             return "Send your a sticker";
-         case "system-log":
-            return "System log";
       }
    }, [cDetail]);
 

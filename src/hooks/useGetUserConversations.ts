@@ -1,5 +1,4 @@
 import { AuthType, useAuth } from "@/stores/AuthContext";
-import { useConversation } from "@/stores/ConversationContext";
 import { useEffect, useRef } from "react";
 import useConversationActions from "./useConversationActions";
 import { sleep } from "@/utils/appHelper";

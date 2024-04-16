@@ -59,6 +59,7 @@ export default function LoginPage() {
             fullName: data.userInfo.fullName,
             token: data.token,
             id: data.userInfo.id,
+            last_seen: "",
          });
 
          return navigate("/");

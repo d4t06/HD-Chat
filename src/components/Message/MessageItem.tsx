@@ -9,11 +9,17 @@ type OtherMessage = {
    user: User;
    message: Message;
    isNewSection: boolean;
+   showName: boolean;
 };
 
 type TempImageMessage = {
    type: "temp-image";
    message: MessageSchema;
+};
+
+type SystemMessage = {
+   type: "system";
+   message: Message;
 };
 
 type SelfMessage = {
@@ -23,7 +29,9 @@ type SelfMessage = {
 };
 
 function MessageItem(
-   props: (OtherMessage | SelfMessage | TempImageMessage) & { className?: string }
+   props: (OtherMessage | SelfMessage | TempImageMessage | SystemMessage) & {
+      className?: string;
+   }
 ) {
    const classes = {
       messageContainer: "flex group",
@@ -56,7 +64,10 @@ function MessageItem(
                      size={"tiny"}
                      blank={!props.isNewSection}
                   />
-                  <MessageContent message={props.message} />
+                  <MessageContent
+                     userFullName={props.showName ? props.user.fullName : ""}
+                     message={props.message}
+                  />
                </div>
             );
 
@@ -64,6 +75,8 @@ function MessageItem(
             return <MessageContent self={true} message={props.message} />;
          case "temp-image":
             return <ImageMessage type="temp" message={props.message} />;
+         case "system":
+            return <MessageContent message={props.message} />;
       }
    }, []);
 
@@ -88,6 +101,8 @@ function MessageItem(
                   {messageCta}
                </div>
             );
+         case "system":
+            return <div className="w-full">{messageContent}</div>;
       }
    }, []);
 

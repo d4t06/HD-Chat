@@ -61,7 +61,7 @@ export default function useSendMessageToNewConversation() {
          const cDetail = conversationDetailFactory([c], auth)[0];
 
          dispatch(addConversation({ conversationDetail: cDetail }));
-
+         
          dispatch(
             storingCurrentConversation({
                conversationDetail: cDetail,
@@ -79,7 +79,7 @@ export default function useSendMessageToNewConversation() {
          sendConversation({
             conversation: c,
             message: newMessage,
-            toUserID: other.user_id,
+            toUserIDs: [other.user_id],
          });
       } catch (error) {
          console.log({ message: error });

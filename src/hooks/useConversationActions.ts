@@ -26,18 +26,18 @@ export default function useConversationActions() {
    const sendConversation = ({
       conversation,
       message,
-      toUserID,
+      toUserIDs,
    }: {
       conversation: Conversation;
       message: Message;
-      toUserID: number;
+      toUserIDs: number[];
    }) => {
       if (!socket) return;
 
       socket.send(
          "/app/conversations",
          {},
-         JSON.stringify({ payload: { conversation, message }, to_user_id: toUserID })
+         JSON.stringify({ payload: { conversation, message }, to_user_ids: toUserIDs })
       );
    };
 

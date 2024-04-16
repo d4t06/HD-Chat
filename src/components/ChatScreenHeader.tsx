@@ -32,12 +32,16 @@ export default function ChatScreenHeader() {
          ? tempUser?.fullName
          : currentConversationInStore.name;
 
-   const desc =
-      currentConversationInStore === null
-         ? "New conversation"
-         : convertDateStringToString(
-              currentConversationInStore.recipient?.user.last_seen || ""
-           );
+   const desc = useMemo(() => {
+      if (currentConversationInStore === null) return "New conversation";
+
+      if (currentConversationInStore.conversation.members.length == 2) {
+         if (!currentConversationInStore.recipient) return "some thing went wrong";
+         return convertDateStringToString(
+            currentConversationInStore.recipient.user.last_seen || ""
+         );
+      } else return `${currentConversationInStore.conversation.members.length} members`
+   }, [currentConversationInStore]);
 
    const closeModal = () => setOpenModal("close");
 
@@ -77,7 +81,7 @@ export default function ChatScreenHeader() {
                   <PopoverContent>
                      <ConversationMenu setOpenModal={setOpenModal} />
                   </PopoverContent>
-               </Popover>
+               </Popover>           
             </div>
          </div>
 

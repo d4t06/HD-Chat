@@ -67,6 +67,9 @@ export default function useMessageActions() {
             to_user_ids: toUserIds,
          };
 
+         console.log('check message before send', message);
+         
+
          if (defaultOpts.sendMessage) {
             socket.send("/app/messages", {}, JSON.stringify(stompMessage));
          }

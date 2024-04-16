@@ -1,7 +1,6 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { AuthType } from "./AuthContext";
 import { conversationDetailFactory } from "@/utils/appHelper";
-import { CurrentConversation } from "./CurrentConversationSlice";
 
 type StateType = {
    conversationDetails: ConversationDetail[];
@@ -147,7 +146,7 @@ const {
    seenMessages,
    setConversationStatus,
    addNewConversation,
-   updateConversation
+   updateConversation,
 } = conversationSlice.actions;
 
 export const selectAllConversations = (state: { conversations: StateType }) => {
@@ -162,7 +161,7 @@ export {
    seenMessages,
    setConversationStatus,
    addNewConversation,
-   updateConversation
+   updateConversation,
 };
 
 export default conversationSlice.reducer;

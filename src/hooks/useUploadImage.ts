@@ -1,5 +1,5 @@
-import { generateId, imageFactory, messageFactory, sleep } from "@/utils/appHelper";
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { generateId, imageFactory, sleep } from "@/utils/appHelper";
+import { ChangeEvent, useEffect, useRef } from "react";
 import usePrivateRequest from "./usePrivateRequest";
 import useMessageActions from "./useMessageActions";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,11 +14,8 @@ import { useAuth } from "@/stores/AuthContext";
 const IMAGE_URL = "/images";
 
 export default function useUploadImage() {
-   // const [tempImageMessagesList, setTempImageMessagesList] = useState<MessageSchema[]>(
-   //    []
-   // );
-
    const tempImageMessagesList = useRef<MessageSchema[]>([]);
+
    // hooks
    const dispatch = useDispatch();
 

@@ -19,10 +19,12 @@ export default function useListenMessage() {
 
    const scrollToLastMessage = () => {
       const lastMessage = document.querySelector(".last-message") as HTMLDListElement;
-      lastMessage.scrollIntoView({
-         behavior: "smooth",
-         block: "start",
-      });
+
+      if (lastMessage)
+         lastMessage.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+         });
    };
 
    const handleReceiveMessage = (message: Message) => {
@@ -41,6 +43,8 @@ export default function useListenMessage() {
 
    const handleNewConversation = (newConversationPayload: NewConversationPayload) => {
       if (!auth) return;
+
+      console.log("check payload", newConversationPayload);
 
       dispatch(addNewConversation({ newConversationPayload, auth }));
    };
@@ -71,9 +75,16 @@ export default function useListenMessage() {
             }
 
             const payload = JSON.parse(m.body) as NewConversationPayload;
+
+            console.log("check payload", payload);
+
             handleNewConversation(payload);
          });
       });
+
+      return () => {
+         socket.disconnect();
+      };
    }, [socket]);
 
    useEffect(() => {

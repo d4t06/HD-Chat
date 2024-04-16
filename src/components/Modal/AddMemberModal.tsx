@@ -7,10 +7,10 @@ import {
    selectCurrentConversation,
    storingCurrentConversation,
 } from "@/stores/CurrentConversationSlice";
-import AccountItem from "../AccountItem";
 import useConversationActions from "@/hooks/useConversationActions";
 import { useAuth } from "@/stores/AuthContext";
 import useMessageActions from "@/hooks/useMessageActions";
+import SelectConversationList from "./SelectConversationList";
 type Props = {
    close: () => void;
 };
@@ -27,25 +27,6 @@ export default function AddMemberModal({ close }: Props) {
 
    const { sendConversation } = useConversationActions();
    const { sendMessage } = useMessageActions();
-
-   const twoMemberConversationDetails = conversationDetails.filter(
-      (cDetail) =>
-         !!cDetail.recipient &&
-         currentConversationInStore?.recipient !== cDetail.recipient
-   );
-
-   const handleToggleConversation = (target: ConversationDetail) => {
-      const newCDetails = [...selectCDetails];
-
-      const index = newCDetails.findIndex(
-         (cDetail) => cDetail.conversation.id === target.conversation.id
-      );
-
-      if (index !== -1) newCDetails.splice(index, 1);
-      else newCDetails.push(target);
-
-      setSelectCDetails(newCDetails);
-   };
 
    const handleAddMemberToConversation = async () => {
       try {
@@ -108,7 +89,7 @@ export default function AddMemberModal({ close }: Props) {
             sendConversation({
                conversation: cDetail.conversation,
                message: newMessage,
-               toUserID: cDetail.recipient.user_id,
+               toUserIDs: [cDetail.recipient.user_id],
             });
          });
 
@@ -119,10 +100,7 @@ export default function AddMemberModal({ close }: Props) {
             })
          );
 
-
          dispatch(updateConversation({ cDetail: targetCDetail }));
-
-
       } catch (error) {
          console.log({ message: error });
       } finally {
@@ -130,38 +108,16 @@ export default function AddMemberModal({ close }: Props) {
       }
    };
 
-   const classes = {
-      active: "!bg-[#c2e7ff]",
-      conversationItem:
-         "hover:bg-[#f3f3f5] rounded-[6px] p-2 sm:px-4 w-full cursor-pointer",
-   };
-
-   const mapContent = twoMemberConversationDetails.map((cDetail, index) => {
-      const active = !!selectCDetails.find(
-         (cDetail) => cDetail.conversation.id === cDetail.conversation.id
-      );
-
-      return (
-         <div
-            onClick={() => handleToggleConversation(cDetail)}
-            key={index}
-            className={`${classes.conversationItem} 
-            ${active ? classes.active : ""}`}
-         >
-            <AccountItem
-               bubble={cDetail.countNewMessages}
-               type="default"
-               fullName={cDetail.name}
-            />
-         </div>
-      );
-   });
-
    return (
       <div className="flex flex-col w-[700px] max-w-[80vw] h-[500px] max-h-[80vh]">
          <ModalHeader close={close} title="Add member" />
          <div className="flex-grow flex flex-col">
-            <div className="flex-grow overflow-auto">{mapContent}</div>
+            <div className="flex-grow overflow-auto">
+               <SelectConversationList
+                  type="add-member"
+                  setSelectCDetails={setSelectCDetails}
+               />
+            </div>
             <div className="flex justify-center">
                <Button
                   onClick={handleAddMemberToConversation}

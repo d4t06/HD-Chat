@@ -11,11 +11,9 @@ import { useMemo, useState } from "react";
 
 export type ChatSidebarMenuModal = "close" | "add-group" | "setting";
 
-
 export default function SidebarHeader() {
    const { auth } = useAuth();
    const [openModal, setOpenModal] = useState<ChatSidebarMenuModal>("close");
-
 
    const closeModal = () => setOpenModal("close");
 
@@ -25,7 +23,7 @@ export default function SidebarHeader() {
       switch (openModal) {
          case "add-group":
          case "setting":
-            return <CreateGroupModal />
+            return <CreateGroupModal close={closeModal} />;
       }
    }, [openModal]);
 
@@ -51,7 +49,7 @@ export default function SidebarHeader() {
          <Popover placement="bottom-end">
             <PopoverTrigger>
                <Button
-                  className="p-[4px]"
+                  className="p-[4px] hidden sm:inline-flex"
                   size={"clear"}
                   variant={"push"}
                   colors={"secondary"}
@@ -66,7 +64,6 @@ export default function SidebarHeader() {
          </Popover>
 
          {openModal !== "close" && <Modal close={closeModal}>{renderModal}</Modal>}
-
       </div>
    );
 }
