@@ -19,8 +19,6 @@ import PreviewImageList from "./PreviewImagesList";
 import { PaperAirplaneIcon } from "@heroicons/react/16/solid";
 import { emojis } from "@/assets/emoji";
 import { stickers } from "@/assets/sticker";
-// import { ArrowPathIcon } from "@heroicons/react/24/outline";
-// import useMemberActions from "@/hooks/useMemberActions";
 
 type Props = {
    lastMessageRef: RefObject<HTMLDivElement>;

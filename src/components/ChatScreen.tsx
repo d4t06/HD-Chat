@@ -3,7 +3,7 @@ import { useAuth } from "@/stores/AuthContext";
 import ChatInput from "./ChatInput";
 import useCurrentConversationMessage from "@/hooks/useCurrentConversationMessages";
 import MessageList from "./MessageList";
-import { ElementRef, useRef } from "react";
+import { ElementRef, useEffect, useRef } from "react";
 
 import ChatScreenHeader from "./ChatScreenHeader";
 
@@ -20,6 +20,13 @@ export default function ChatScreen() {
    const { auth } = useAuth();
    const { currentConversationInStore, tempUser, messageStatus } =
       useCurrentConversationMessage();
+
+   // scroll to last message when enter to conversation
+   useEffect(() => {
+      if (messageStatus === "successful") {
+         lastMessageRef.current?.scrollIntoView({ behavior: "instant", block: "center" });
+      }
+   }, [messageStatus]);
 
    if ((currentConversationInStore === null && tempUser === null) || !auth) return <></>;
 

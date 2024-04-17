@@ -67,7 +67,7 @@ export default function MessageContent({ message, self, userFullName }: Props) {
          );
       case "system-log":
          return (
-            <p className="text-center text-[#808080] text-[14px]">
+            <p className="text-center text-[#808080] text-[14px] py-[10px]">
                {message.content} - {convertDateStringToString(message.send_at)}
             </p>
          );

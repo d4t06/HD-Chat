@@ -1,5 +1,5 @@
 import { generateId, imageFactory, sleep } from "@/utils/appHelper";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useEffect, useRef } from "react";
 import usePrivateRequest from "./usePrivateRequest";
 import useMessageActions from "./useMessageActions";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,7 +14,7 @@ import { useAuth } from "@/stores/AuthContext";
 const IMAGE_URL = "/images";
 
 export default function useUploadImage() {
-   // const tempImageMessagesList = useRef<MessageSchema[]>([]);
+   const currentConversationRef = useRef<Conversation>();
 
    // hooks
    const dispatch = useDispatch();
@@ -114,11 +114,13 @@ export default function useUploadImage() {
 
             if (!newMessage) throw new Error("error when send message");
 
-            dispatch(
-               storingMessages({
-                  messages: [newMessage],
-               })
-            );
+            if (currentConversationRef.current?.id === newMessage.conversation_id) {
+               dispatch(
+                  storingMessages({
+                     messages: [newMessage],
+                  })
+               );
+            }
 
             dispatch(spliceTempImage());
          }
@@ -129,9 +131,9 @@ export default function useUploadImage() {
       }
    };
 
-   // useEffect(() => {
-   //    tempImageMessagesList.current = tempImageMessages;
-   // }, [tempImageMessages]);
+   useEffect(() => {
+      currentConversationRef.current = currentConversationInStore?.conversation;
+   }, [currentConversationInStore?.conversation.id]);
 
    return { handleInputChange, handleSendImage };
 }

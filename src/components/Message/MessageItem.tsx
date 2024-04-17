@@ -111,7 +111,7 @@ function MessageItem(
                         classes.messageContainer
                      } flex-row-reverse justify-start  ${props.className || ""}`}
                   >
-                     <div className="max-w-[100px]">{messageContent}</div>
+                     <div className="max-w-[500px]">{messageContent}</div>
                      {messageCta}
                   </div>
                </>
@@ -123,7 +123,7 @@ function MessageItem(
                      classes.messageContainer
                   } flex-row-reverse justify-start  ${props.className || ""}`}
                >
-                  <div className="max-w-[100px]">{messageContent}</div>
+                  <div className="max-w-[500px]">{messageContent}</div>
                   {messageCta}
                </div>
             );
