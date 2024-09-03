@@ -18,7 +18,7 @@ export const classes = {
       "bg-red-500/30 text-red-500 font-[500] md:mr-[14px] p-[6px] mt-[20px] rounded-[6px] inline-block",
 };
 
-const LOGIN_URL = "http://localhost:8080/auth/login";
+const LOGIN_URL = `${import.meta.env.VITE_API_ENDPOINT || "https://chat-app-backend-latest.onrender.com"}/auth/login`;
 
 export default function LoginPage() {
    const inputRef = useRef<HTMLInputElement>(null);
@@ -87,7 +87,7 @@ export default function LoginPage() {
          >
             <div className="mt-0 md:mt-[-50px] text-center md:text-left">
                <h1 className={classes.myChat}>
-                  My <span className="text-[#cd1818]">Chat</span>
+                  HD <span className="text-[#cd1818]">Chat</span>
                </h1>
                <h1 className="text-[26px] mt-[10px] text-[#1f1f1f]">Sign in</h1>
                {errMsg && <p className={classes.errorMessage}>{errMsg}</p>}

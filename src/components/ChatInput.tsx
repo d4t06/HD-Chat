@@ -19,6 +19,7 @@ import PreviewImageList from "./PreviewImagesList";
 import { PaperAirplaneIcon } from "@heroicons/react/16/solid";
 import { emojis } from "@/assets/emoji";
 import { stickers } from "@/assets/sticker";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 
 type Props = {
    lastMessageRef: RefObject<HTMLDivElement>;
@@ -27,7 +28,7 @@ type Props = {
 export default function ChatInput({ lastMessageRef }: Props) {
    const [message, setMessage] = useState("");
    const imageInputRef = useRef<ElementRef<"input">>(null);
-   // const [isFetching, setIsFetching] = useState(false);
+   const [isFetching, setIsFetching] = useState(false);
 
    //hooks
    const { auth } = useAuth();
@@ -48,7 +49,7 @@ export default function ChatInput({ lastMessageRef }: Props) {
 
          let messageSchemaNoConversation: MessageSchemaNoConversation | null = null;
 
-         // setIsFetching(true);
+         setIsFetching(true);
 
          // init message obj
          switch (type) {
@@ -124,7 +125,7 @@ export default function ChatInput({ lastMessageRef }: Props) {
          console.log({ message: error });
       } finally {
          clear();
-         // setIsFetching(false);
+         setIsFetching(false);
 
          lastMessageRef.current?.scrollIntoView({
             behavior: "smooth",
@@ -161,12 +162,12 @@ export default function ChatInput({ lastMessageRef }: Props) {
    };
 
    const renderSendButton = useMemo(() => {
-      // if (isFetching)
-      //    return (
-      //       <SendButton onClick={() => {}}>
-      //          <ArrowPathIcon className="w-[20px] animate-spin text-[#cd1818]" />
-      //       </SendButton>
-      //    );
+      if (isFetching)
+         return (
+            <SendButton onClick={() => {}}>
+               <ArrowPathIcon className="w-[20px] animate-spin text-[#cd1818]" />
+            </SendButton>
+         );
       if (tempImages.length)
          return (
             <SendButton onClick={() => handleSendMessage("image")}>
@@ -193,7 +194,7 @@ export default function ChatInput({ lastMessageRef }: Props) {
             </svg>
          </SendButton>
       );
-   }, [message, tempImages]);
+   }, [message, tempImages, isFetching]);
 
    const classes = {
       container: "flex p-2 sm:p-4 border-t",
@@ -207,7 +208,7 @@ export default function ChatInput({ lastMessageRef }: Props) {
       <div
          className={`${classes.container} ${
             tempImages.length ? "items-end" : "items-center"
-         }`}
+         } ${isFetching ? 'disable' : ''}`}
       >
          <input
             ref={imageInputRef}

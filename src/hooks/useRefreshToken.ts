@@ -1,7 +1,7 @@
 import axios from "axios";
 import { AuthResponse, useAuth } from "../stores/AuthContext";
 
-const REFRESH_URL = "http://localhost:8080/auth/refresh";
+const REFRESH_URL = `${import.meta.env.VITE_API_ENDPOINT || "https://chat-app-backend-latest.onrender.com"}/auth/refresh`;
 
 const useRefreshToken = () => {
    const { setAuth } = useAuth();

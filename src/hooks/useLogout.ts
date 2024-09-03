@@ -14,7 +14,7 @@ export default function useLogout() {
    const logout = async () => {
       try {
          setIsFetching(true);
-         await axios.get("http://localhost:8080/auth/logout", {
+         await axios.get(`${import.meta.env.VITE_API_ENDPOINT || "https://chat-app-backend-latest.onrender.com"}/auth/logout`, {
             withCredentials: true,
          });
       } catch (error) {

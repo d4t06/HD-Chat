@@ -1,4 +1,4 @@
-import { Route, BrowserRouter, Routes } from "react-router-dom";
+import { Route, HashRouter, Routes } from "react-router-dom";
 import { Route as RouteType, privateRoutes, publicRoutes } from "./system/route";
 import DefaultLayout from "./layouts/DefaultLayout";
 import PersistLogin from "./components/PersitLogin";
@@ -26,7 +26,7 @@ function App() {
    };
 
    return (
-      <BrowserRouter basename="My-Chat">
+      <HashRouter>
          <Routes>
             {renderRoute(publicRoutes)}
 
@@ -34,7 +34,7 @@ function App() {
                <Route element={<RequireAuth />}>{renderRoute(privateRoutes)}</Route>
             </Route>
          </Routes>
-      </BrowserRouter>
+      </HashRouter>
    );
 }
 

@@ -15,7 +15,7 @@ export default function useConnectSocket() {
 
       const handleInitSocketJS = async () => {
          try {
-            const ws = new SockJS("http://localhost:8080/messages/");
+            const ws = new SockJS(`${import.meta.env.VITE_API_ENDPOINT || "https://chat-app-backend-latest.onrender.com"}/messages/`);
             stompClient = Stomp.over(ws);
 
             setSocket(stompClient);

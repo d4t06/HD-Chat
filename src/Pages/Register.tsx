@@ -110,7 +110,7 @@ export default function RegisterPage() {
          >
             <div className="mt-0 md:mt-[-50px] text-center md:text-left space-y-[10px]">
                <h1 className="text-[26px] font-[500]">
-                  My <span className="text-[#cd1818]">Chat</span>
+                  HD <span className="text-[#cd1818]">Chat</span>
                </h1>
                <h2 className="text-[22px]">Sign in</h2>
                {errMsg && <p className={classes.errorMessage}>{errMsg}</p>}

@@ -10,9 +10,8 @@ type Props = {
 };
 
 export default function MessageList({ auth }: Props) {
-   const { currentConversationInStore, messages, tempImageMessages } = useSelector(
-      selectCurrentConversation
-   );
+   const { currentConversationInStore, messages, tempImageMessages } =
+      useSelector(selectCurrentConversation);
 
    let from_user_id = 999;
    let isNewSection = false;
@@ -23,11 +22,15 @@ export default function MessageList({ auth }: Props) {
 
    const renderTempsMessage = useMemo(() => {
       if (!currentConversationInStore) return <></>;
-      
+
       if (!!tempImageMessages.length) {
          return tempImageMessages.map((m) => {
-            if (m.conversation_id === currentConversationInStore?.conversation.id)
-               return <MessageItem key={nanoid(4)} type="temp-image" message={m} />;
+            if (
+               m.conversation_id === currentConversationInStore?.conversation.id
+            )
+               return (
+                  <MessageItem key={nanoid(4)} type="temp-image" message={m} />
+               );
          });
       }
    }, [tempImageMessages]);
@@ -47,7 +50,14 @@ export default function MessageList({ auth }: Props) {
                );
 
             // the first message is alway new section
-            if (m.from_user_id !== from_user_id) {
+            const minuteDiff =
+               index > 0
+                  ? (new Date(m.send_at).getTime() -
+                       new Date(messages[index - 1].send_at).getTime()) /
+                    (1000 * 60)
+                  : 99;
+
+            if (minuteDiff > 10) {
                isNewSection = true;
             } else isNewSection = false;
 
@@ -66,9 +76,10 @@ export default function MessageList({ auth }: Props) {
                   />
                );
 
-            const member = currentConversationInStore?.conversation.members.find(
-               (mem) => mem.user_id === m.from_user_id
-            );
+            const member =
+               currentConversationInStore?.conversation.members.find(
+                  (mem) => mem.user_id === m.from_user_id
+               );
 
             if (!member) return <p key={index}>Member not found</p>;
 

@@ -3,10 +3,6 @@ const getHashOfString = (str: String) => {
    return array.reduce((total, _char, index) => (total += str.charCodeAt(index)), 0);
 };
 
-// const hRange = [0, 360];
-// const sRange = [0, 100];
-// const lRange = [0, 100];
-
 const hRange = [0, 360];
 const sRange = [50, 75];
 const lRange = [25, 60];
