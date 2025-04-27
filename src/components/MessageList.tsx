@@ -13,7 +13,6 @@ export default function MessageList({ auth }: Props) {
    const { currentConversationInStore, messages, tempImageMessages } =
       useSelector(selectCurrentConversation);
 
-   let from_user_id = 999;
    let isNewSection = false;
 
    const isInGroup = currentConversationInStore
@@ -60,8 +59,6 @@ export default function MessageList({ auth }: Props) {
             if (minuteDiff > 10) {
                isNewSection = true;
             } else isNewSection = false;
-
-            from_user_id = m.from_user_id;
 
             const isSelf = m.from_user_id === auth.id;
 
